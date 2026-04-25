@@ -1,0 +1,90 @@
+:root{
+  --bg: #06070a;
+  --fg: rgba(255,255,255,0.92);
+  --muted: rgba(255,255,255,0.62);
+  --hair: rgba(255,255,255,0.14);
+
+  --font-serif: "Cormorant Garamond", ui-serif, Georgia, "Times New Roman", serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+
+  --ls-ui: 0.18em;
+  --ls-eyebrow: 0.26em;
+  --ls-title: 0.06em;
+
+  --header-h: 64px;
+  --page-pad: clamp(18px, 3vw, 48px);
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Motion tokens (single rhythm across the site) */
+  --t-hover: 220ms;
+  --t-hover-slow: 280ms;
+
+  --t-cut: 200ms;
+  --t-page: 450ms;
+  --t-curtain: 320ms;
+  --t-route-opacity: 360ms;
+  --t-route-transform: 460ms;
+
+  --t-backdrop: 520ms;
+  --t-drawer-move: 760ms;
+  --t-drawer-opacity: 620ms;
+  --t-drawer-filter: 860ms;
+  --t-drawer-exit: 900ms; /* JS uses this to unmount after exit */
+
+  --y-page: 6px;
+
+}
+
+html{
+  background: var(--bg);
+  color: var(--fg);
+  text-rendering: geometricPrecision;
+  -webkit-text-size-adjust: 100%;
+
+  /* ВАЖЛИВО: ховаємо горизонтальний overflow на рівні html,
+     щоб не робити scroll-контейнером .shell */
+  overflow-x: hidden;
+}
+
+body{
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*{ box-sizing: border-box; }
+img, video{ display:block; max-width:100%; }
+
+button{
+  font-family: inherit;
+  color: inherit;
+}
+
+::selection{
+  background: rgba(255,255,255,0.14);
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Hide scrollbar but keep scrolling */
+html{
+  scrollbar-width: none;      /* Firefox */
+  -ms-overflow-style: none;   /* old Edge/IE */
+}
+
+html::-webkit-scrollbar{
+  width: 0;
+  height: 0;
+}

@@ -1,0 +1,27 @@
+.wrap{
+  position: relative;
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
+/* відео/постер завжди покриває екран без щілин */
+.video{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+
+  /* легка "кінематографічна" поліровка */
+  transform: scale(1.03);
+  filter: contrast(1.04) saturate(0.98);
+}
+
+.vignette{
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(closest-side at 50% 45%, transparent 55%, rgba(0,0,0,0.72) 100%);
+}

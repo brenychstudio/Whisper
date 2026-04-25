@@ -1,0 +1,208 @@
+.backdrop{
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0,0,0,0.58);
+  backdrop-filter: blur(6px);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.modal{
+  width: min(1120px, 96vw);
+  height: min(640px, 82vh);
+  display: grid;
+
+  /* ✅ більше простору під фото, менше під панель */
+  grid-template-columns: minmax(0, 1.9fr) minmax(340px, 0.95fr);
+
+  gap: 0;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(10,10,13,0.86);
+  box-shadow: 0 20px 80px rgba(0,0,0,0.55);
+}
+
+@media (max-width: 860px){
+  .modal{
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+}
+
+.media{
+  position: relative;
+  overflow: hidden;
+  border-right: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.35);
+
+  /* ✅ щоб contain виглядав преміум (рамка/повітря) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+@media (max-width: 860px){
+  .media{ border-right: 0; border-bottom: 1px solid rgba(255,255,255,0.10); }
+}
+
+.media img{
+  width: 100%;
+  height: 100%;
+
+  /* ✅ повністю вміщується, без обрізання */
+  object-fit: contain;
+
+  display: block;
+  transform: none;
+}
+
+.panel{
+  padding: 22px 22px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow: auto; /* якщо контент довгий */
+}
+
+.head{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.title{
+  font-family: var(--font-serif);
+  font-size: 16px;
+  letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.92);
+}
+
+.meta{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: rgba(255,255,255,0.62);
+}
+
+.block{
+  border-top: 1px solid rgba(255,255,255,0.10);
+  padding-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.label{
+  font-family: var(--font-sans);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.66);
+}
+
+.sizes{
+  display: grid;
+  gap: 8px;
+}
+
+.sizeBtn{
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.12);
+  padding: 10px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  cursor: pointer;
+  transition: border-color var(--t-hover) var(--ease), background var(--t-hover) var(--ease);
+}
+
+.sizeBtn:hover{
+  border-color: rgba(255,255,255,0.28);
+}
+
+.sizeBtnActive{
+  border-color: rgba(255,255,255,0.34);
+  background: rgba(255,255,255,0.04);
+}
+
+.sizeText{
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.86);
+}
+
+.sizePrice{
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.70);
+}
+
+.row{
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+
+.muted{
+  color: rgba(255,255,255,0.55);
+}
+
+.price{
+  color: rgba(255,255,255,0.92);
+  letter-spacing: 0.08em;
+}
+
+.value{
+  color: rgba(255,255,255,0.74);
+}
+
+.actions{
+  margin-top: auto;
+  display: flex;
+  gap: 10px;
+}
+
+.primary, .ghost{
+  font-family: var(--font-sans);
+  font-size: 11px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  padding: 12px 14px;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: transparent;
+  color: rgba(255,255,255,0.86);
+  transition: border-color var(--t-hover) var(--ease), background var(--t-hover) var(--ease);
+}
+
+.primary:hover{
+  border-color: rgba(255,255,255,0.34);
+  background: rgba(255,255,255,0.04);
+}
+
+.ghost{
+  color: rgba(255,255,255,0.70);
+}
+
+.ghost:hover{
+  border-color: rgba(255,255,255,0.28);
+}
+
+.hint{
+  margin-top: 8px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: rgba(255,255,255,0.45);
+}

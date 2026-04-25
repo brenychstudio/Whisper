@@ -1,0 +1,17 @@
+.wrap{
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+
+  /* було 40 — через це затемнювало текст */
+  z-index: 1;
+
+  opacity: 0.80;
+  mix-blend-mode: normal;
+}
+
+.canvas{
+  width: 100%;
+  height: 100%;
+  display: block;
+}

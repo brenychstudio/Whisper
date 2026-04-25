@@ -1,0 +1,41 @@
+.page{
+  width:100%;
+  min-height:100dvh;
+  background:#05060a;
+  color:rgba(255,255,255,0.92);
+  display:grid;
+  grid-template-rows:auto 1fr;
+}
+
+.top{ padding: 18px var(--page-pad) 10px; }
+
+.title{
+  font-family: var(--font-sans);
+  font-size: 11px;
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.72);
+}
+
+.sub{
+  margin-top: 8px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: rgba(255,255,255,0.58);
+}
+
+.stage{
+  padding: 0 var(--page-pad) 18px;
+}
+
+.loading{
+  height: 60vh;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.02);
+  display: grid;
+  place-items: center;
+  color: rgba(255,255,255,0.55);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}

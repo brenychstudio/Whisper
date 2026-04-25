@@ -1,0 +1,40 @@
+.page{ width:100%; padding: calc(var(--header-h) + 44px) 0 110px; }
+.inner{ width:min(92vw, 980px); margin:0 auto; }
+
+.eyebrow{
+  font-family: var(--font-sans);
+  font-size: 11px;
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.62);
+}
+
+.h1{
+  margin: 10px 0 0;
+  font-family: var(--font-serif);
+  letter-spacing: var(--ls-title);
+  font-weight: 500;
+  font-size: clamp(34px, 4.4vw, 58px);
+  color: rgba(255,255,255,0.92);
+}
+
+.p{
+  margin: 16px 0 0;
+  max-width: 72ch;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.85;
+  color: rgba(255,255,255,0.68);
+}
+
+.note{
+  margin-top: 14px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: rgba(255,255,255,0.55);
+}
+
+.mono{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  color: rgba(255,255,255,0.72);
+}

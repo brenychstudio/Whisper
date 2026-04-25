@@ -1,0 +1,80 @@
+.page{
+  position: relative;
+}
+
+.center{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  width: min(92vw, 760px);
+  z-index: 5;
+}
+
+.eyebrow{
+  font-family: var(--font-sans);
+  font-size: 11px;
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.62);
+}
+
+.title{
+  font-family: var(--font-serif);
+  letter-spacing: var(--ls-title);
+  font-weight: 500;
+  font-size: clamp(40px, 6vw, 78px);
+  color: rgba(255,255,255,0.92);
+  text-shadow: 0 1px 18px rgba(0,0,0,0.55);
+}
+
+
+.tagline{
+  font-family: var(--font-sans);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: rgba(255,255,255,0.62); /* ← поверни це */
+  max-width: 56ch;
+  margin-inline: auto; /* ← центрування */
+}
+
+.cta{
+  margin-top: 0px;
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid rgba(255,255,255,0.18);
+  padding: 12px 18px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.cta:hover{
+  border-color: rgba(255,255,255,0.32);
+}
+
+.ctaRow{
+  margin-top: 28px;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.ctaGhost{
+  background: transparent;
+  color: rgba(255,255,255,0.72);
+  border: 1px solid rgba(255,255,255,0.12);
+  padding: 12px 18px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.ctaGhost:hover{
+  border-color: rgba(255,255,255,0.26);
+  color: rgba(255,255,255,0.86);
+}

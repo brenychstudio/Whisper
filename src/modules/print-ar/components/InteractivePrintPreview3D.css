@@ -1,0 +1,38 @@
+.print-ar-preview3d,
+.interactive-print-preview-3d {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 28px;
+  isolation: isolate;
+  min-height: clamp(340px, 56vh, 780px);
+  touch-action: none;
+  cursor: grab;
+}
+
+.print-ar-preview3d:active,
+.interactive-print-preview-3d:active {
+  cursor: grabbing;
+}
+
+.print-ar-preview3d__backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.print-ar-preview3d__viewport,
+.interactive-print-preview-3d__stage {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.print-ar-preview3d__viewport canvas,
+.interactive-print-preview-3d canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

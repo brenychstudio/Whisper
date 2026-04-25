@@ -1,0 +1,10 @@
+
+DevTools listening on ws://127.0.0.1:9222/devtools/browser/5e22d7bc-6b95-484c-8516-ae7fbfc48ec3
+[34276:17120:0410/133551.003:ERROR:components\device_event_log\device_event_log_impl.cc:202] [13:35:51.003] USB: usb_service_win.cc:108 SetupDiGetDeviceProperty({{A45C254E-DF1C-4EFD-8020-67D146A850E0}, 6}) failed: Элемент не найден. (0x490)
+[34276:34028:0410/133551.442:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: PHONE_REGISTRATION_ERROR
+Created TensorFlow Lite XNNPACK delegate for CPU.
+[34276:34028:0410/133613.982:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
+[34276:34028:0410/133702.028:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
+[34276:34028:0410/133845.052:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
+[34276:34028:0410/134238.107:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
+[34276:34028:0410/134837.174:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT

@@ -1,0 +1,185 @@
+.shell{
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--fg);
+  /* overflow-x прибрали звідси — тепер це на html */
+}
+
+/* Overlay для Home */
+.overlayHome{
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(1200px 800px at 50% 20%, rgba(255,255,255,0.06), transparent 55%),
+    radial-gradient(900px 700px at 60% 80%, rgba(255,255,255,0.04), transparent 60%),
+    linear-gradient(180deg, rgba(0,0,0,0.55), rgba(0,0,0,0.78));
+}
+
+/* Overlay для внутрішніх */
+.overlayInner{
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(1200px 800px at 50% 50%, transparent 55%, rgba(0,0,0,0.28) 100%);
+}
+
+.header{
+  height: var(--header-h);
+  padding: 0 var(--page-pad);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 50;
+}
+
+.brand{
+  cursor: pointer;
+  user-select: none;
+}
+
+.brandTitle{
+  font-family: var(--font-sans);
+  letter-spacing: var(--ls-ui);
+  font-size: 11px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.72);
+}
+
+.nav{
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+/* NAV BTN — cinematic micro */
+.navBtn{
+  font-size: 11px;
+  letter-spacing: var(--ls-ui);
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.62);
+  background: transparent;
+  position: relative;
+  border: 0;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: color var(--t-hover) var(--ease), letter-spacing var(--t-hover) var(--ease);
+}
+
+.navBtn::after{
+  content:"";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 4px;
+  height: 1px;
+  background: rgba(255,255,255,0.26);
+  transform: scaleX(0);
+  transform-origin: center;
+  opacity: 0;
+  transition:
+    transform var(--t-hover-slow) var(--ease),
+    opacity var(--t-hover-slow) var(--ease),
+    background var(--t-hover-slow) var(--ease);
+}
+
+.navBtn:hover{
+  color: rgba(255,255,255,0.86);
+  letter-spacing: calc(var(--ls-ui) + 0.02em);
+}
+.navBtn:hover::after{
+  transform: scaleX(1);
+  opacity: 0.95;
+}
+
+.navBtnActive{
+  color: rgba(255,255,255,0.90);
+}
+.navBtnActive::after{
+  transform: scaleX(1);
+  opacity: 1;
+  background: rgba(255,255,255,0.34);
+}
+
+.navBtn:focus-visible{
+  outline: none;
+}
+.navBtn:focus-visible::after{
+  transform: scaleX(1);
+  opacity: 1;
+  background: rgba(255,255,255,0.34);
+}
+
+/* Ambient under content */
+.ambientWrap{
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* ✅ cinematic curtain (fade from black) — зробили м’якше */
+.curtain{
+  position: fixed;
+  inset: 0;
+  z-index: 80; /* covers header/content briefly */
+  pointer-events: none;
+  background: #000;
+  opacity: 0;
+  transition: opacity var(--t-curtain) var(--ease);
+}
+.curtainOn{
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .curtain{ transition: none; }
+}
+
+/* content */
+.main{
+  position: relative;
+  z-index: 3;
+  padding-top: var(--header-h);
+
+  /*  прибирає “ривок” при переході між fullBleed і normal */
+  transition: padding-top var(--t-route-transform) var(--ease);
+}
+
+/* full-bleed для Home + /series */
+.mainFullBleed{
+  padding-top: 0;
+
+  /*  не лочимо сторінку по висоті/overflow під час переходів */
+  min-height: 100dvh;
+}
+
+/*  route reveal — повільніше + м’якший blur/float */
+/*  route reveal — premium: без blur (щоб фото не "мило") */
+.routeWrap{
+  opacity: 0;
+  transform: translate3d(0, 4px, 0);
+  transition:
+    opacity var(--t-route-opacity) var(--ease),
+    transform var(--t-route-transform) var(--ease);
+  will-change: opacity, transform;
+}
+
+.routeIn{
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+@media (prefers-reduced-motion: reduce){
+  .routeWrap{
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+

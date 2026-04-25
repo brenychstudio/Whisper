@@ -1,0 +1,88 @@
+.atmospheric-backdrop {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      circle at 50% var(--atmosphere-center-glow-y),
+      rgba(
+        var(--atmosphere-center-glow-color),
+        var(--atmosphere-center-glow-opacity)
+      )
+        0%,
+      rgba(
+        var(--atmosphere-center-glow-color),
+        calc(var(--atmosphere-center-glow-opacity) * 0.55)
+      )
+        22%,
+      rgba(var(--atmosphere-center-glow-color), 0) var(--atmosphere-center-glow-size)
+    ),
+    linear-gradient(
+      180deg,
+      var(--atmosphere-base-top) 0%,
+      var(--atmosphere-base-mid) 48%,
+      var(--atmosphere-base-bottom) 100%
+    );
+}
+
+.atmospheric-backdrop__field,
+.atmospheric-backdrop__drift,
+.atmospheric-backdrop__vignette {
+  position: absolute;
+  inset: 0;
+}
+
+.atmospheric-backdrop__field {
+  background:
+    radial-gradient(
+      ellipse at 50% 40%,
+      rgba(
+        var(--atmosphere-secondary-glow-color),
+        var(--atmosphere-secondary-glow-opacity)
+      )
+        0%,
+      rgba(var(--atmosphere-secondary-glow-color), 0) 66%
+    );
+  opacity: 0.9;
+}
+
+.atmospheric-backdrop__drift {
+  inset: -8%;
+  filter: blur(var(--atmosphere-drift-blur));
+  opacity: var(--atmosphere-drift-opacity);
+  background:
+    radial-gradient(circle at 28% 30%, rgba(84, 104, 132, 0.5) 0%, transparent 46%),
+    radial-gradient(circle at 72% 62%, rgba(46, 58, 74, 0.42) 0%, transparent 42%),
+    radial-gradient(circle at 46% 74%, rgba(22, 29, 38, 0.34) 0%, transparent 50%);
+  transform: translate3d(0, 0, 0);
+  animation: atmospheric-backdrop-drift var(--atmosphere-motion-duration) ease-in-out infinite alternate;
+}
+
+.atmospheric-backdrop__vignette {
+  background:
+    radial-gradient(
+      ellipse at 50% 46%,
+      rgba(0, 0, 0, 0) 34%,
+      rgba(0, 0, 0, calc(var(--atmosphere-vignette-strength) * 0.32)) 68%,
+      rgba(0, 0, 0, var(--atmosphere-vignette-strength)) 100%
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 14%);
+  mix-blend-mode: normal;
+}
+
+.atmospheric-backdrop--interactive .atmospheric-backdrop__drift {
+  animation-play-state: paused;
+  opacity: calc(var(--atmosphere-drift-opacity) * 0.55);
+}
+
+@keyframes atmospheric-backdrop-drift {
+  0% {
+    transform: translate3d(calc(var(--atmosphere-motion-amplitude) * -0.35), 0, 0);
+  }
+
+  100% {
+    transform: translate3d(calc(var(--atmosphere-motion-amplitude) * 0.35), calc(var(--atmosphere-motion-amplitude) * -0.2), 0);
+  }
+}

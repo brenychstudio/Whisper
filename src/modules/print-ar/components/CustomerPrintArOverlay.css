@@ -1,0 +1,990 @@
+.customer-print-ar-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(5, 7, 12, 0.72);
+  backdrop-filter: blur(10px);
+}
+
+/* =========================================================
+   WHISPER Pass 1.2 — micro typography and spacing refinement
+   Fine-tuning only. No logic changes.
+   Append after Pass 1.1 overrides.
+   ========================================================= */
+
+/* Shell sizing: slightly more composed and less generic-app */
+.customer-print-ar-shell,
+.customer-print-ar-dialog,
+.customer-print-ar-surface {
+  width: min(1140px, calc(100vw - 72px));
+  max-height: min(875px, calc(100vh - 48px));
+}
+
+/* Header: stronger editorial balance */
+.customer-print-ar-header {
+  padding: 26px 24px 22px;
+  margin-bottom: 0;
+}
+
+.customer-print-ar-kicker,
+.customer-print-ar-label,
+.customer-print-ar-eyebrow {
+  margin-bottom: 10px;
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  opacity: 0.72;
+}
+
+.customer-print-ar-title,
+.customer-print-ar-heading,
+.customer-print-ar-product-title {
+  font-size: clamp(34px, 3.15vw, 46px);
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+  font-weight: 620;
+  max-width: 17ch;
+  text-wrap: balance;
+}
+
+/* Close button: quieter, more collector-facing */
+.customer-print-ar-close,
+.customer-print-ar-btn-close {
+  min-height: 48px;
+  padding: 0 20px;
+  font-size: 14px;
+  font-weight: 560;
+  letter-spacing: -0.01em;
+}
+
+/* Body spacing */
+.customer-print-ar-layout,
+.customer-print-ar-grid,
+.customer-print-ar-body {
+  padding: 36px 20px 20px;
+  gap: 18px;
+  align-items: stretch;
+}
+
+/* Preview: tighter framing and stronger object focus */
+.customer-print-ar-preview-wrap,
+.customer-print-ar-preview-card,
+.customer-print-ar-stage,
+.customer-print-ar-scene {
+  min-height: clamp(520px, 58vh, 710px);
+}
+
+.customer-print-ar-preview-inner,
+.customer-print-ar-canvas-wrap {
+  padding: clamp(18px, 2.2vw, 34px);
+}
+
+/* If the module canvas/image wrapper accepts object positioning */
+.customer-print-ar-preview-wrap canvas,
+.customer-print-ar-preview-card canvas,
+.customer-print-ar-stage canvas,
+.customer-print-ar-scene canvas {
+  outline: none;
+}
+
+/* Sidebar: cleaner vertical rhythm */
+.customer-print-ar-sidebar,
+.customer-print-ar-summary,
+.customer-print-ar-panel {
+  padding: 20px 14px;
+}
+
+.customer-print-ar-sidebar > *,
+.customer-print-ar-summary > *,
+.customer-print-ar-panel > * {
+  margin-top: 0;
+}
+
+.customer-print-ar-sidebar > * + *,
+.customer-print-ar-summary > * + *,
+.customer-print-ar-panel > * + * {
+  margin-top: 16px;
+}
+
+/* Frame finish label */
+.customer-print-ar-summary h2,
+.customer-print-ar-summary h3,
+.customer-print-ar-panel h2,
+.customer-print-ar-panel h3,
+.customer-print-ar-section-title {
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 650;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* Frame selector: more precise, less pill-heavy */
+.customer-print-ar-frame-pill,
+.customer-print-ar-chip,
+.customer-print-ar-segment {
+  min-height: 35px;
+  padding: 0 18px;
+  font-size: 12px;
+  font-weight: 590;
+  letter-spacing: -0.01em;
+}
+
+.customer-print-ar-frame-pill--active,
+.customer-print-ar-chip--active,
+.customer-print-ar-segment--active,
+.customer-print-ar-frame-pill[aria-pressed="true"],
+.customer-print-ar-chip[aria-pressed="true"],
+.customer-print-ar-segment[aria-pressed="true"] {
+  background: rgba(223, 216, 201, 0.08);
+  border-color: rgba(223, 216, 201, 0.34);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.035),
+    0 0 0 1px rgba(0, 0, 0, 0.22);
+}
+
+/* Key/value rows: better reading cadence */
+.customer-print-ar-meta-row,
+.customer-print-ar-kv-row,
+.customer-print-ar-stat-row {
+  padding: 14px 0;
+  min-height: 46px;
+}
+
+.customer-print-ar-meta-label,
+.customer-print-ar-kv-label,
+.customer-print-ar-stat-label {
+  font-size: 15px;
+  line-height: 1.25;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.customer-print-ar-meta-value,
+.customer-print-ar-kv-value,
+.customer-print-ar-stat-value {
+  font-size: 15px;
+  line-height: 1.25;
+  font-weight: 650;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Status card: less "error", more calm unavailable state */
+.customer-print-ar-state,
+.customer-print-ar-status-card,
+.customer-print-ar-notice {
+  padding: 16px 14px;
+}
+
+.customer-print-ar-state--unavailable {
+  border-color: rgba(255, 255, 255, 0.09);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.038), rgba(255, 255, 255, 0.022));
+}
+
+.customer-print-ar-state-title,
+.customer-print-ar-status-title {
+  font-size: 15px;
+  line-height: 1.25;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+}
+
+.customer-print-ar-state-copy,
+.customer-print-ar-status-copy,
+.customer-print-ar-unavailable-copy {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+/* Supporting copy */
+.customer-print-ar-note,
+.customer-print-ar-footnote,
+.customer-print-ar-caption,
+.customer-print-ar-helper {
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.54);
+}
+
+/* Footer/actions: finer button weight and spacing */
+.customer-print-ar-actions,
+.customer-print-ar-footer,
+.customer-print-ar-button-row {
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.customer-print-ar-btn,
+.customer-print-ar-action,
+.customer-print-ar-cta {
+  min-height: 48px;
+  padding: 0 20px;
+  font-size: 14px;
+  font-weight: 570;
+  letter-spacing: -0.012em;
+}
+
+.customer-print-ar-btn--primary,
+.customer-print-ar-action--primary,
+.customer-print-ar-cta--primary {
+  background: rgba(255, 255, 255, 0.075);
+  border-color: rgba(255, 255, 255, 0.17);
+}
+
+.customer-print-ar-btn--primary:hover,
+.customer-print-ar-action--primary:hover,
+.customer-print-ar-cta--primary:hover {
+  background: rgba(255, 255, 255, 0.105);
+  border-color: rgba(223, 216, 201, 0.26);
+}
+
+.customer-print-ar-btn--secondary,
+.customer-print-ar-action--secondary,
+.customer-print-ar-cta--secondary {
+  background: rgba(255, 255, 255, 0.012);
+  border-color: rgba(255, 255, 255, 0.105);
+}
+
+/* Back button should stay quieter than purchase */
+.customer-print-ar-btn:not(.customer-print-ar-btn--primary),
+.customer-print-ar-action:not(.customer-print-ar-action--primary),
+.customer-print-ar-cta:not(.customer-print-ar-cta--primary) {
+  color: rgba(255, 255, 255, 0.76);
+}
+
+/* Reduce visual noise inside the module */
+.customer-print-ar-sidebar hr,
+.customer-print-ar-summary hr,
+.customer-print-ar-panel hr {
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.055);
+  margin: 0;
+}
+
+/* Medium screens */
+@media (max-width: 1100px) {
+  .customer-print-ar-shell,
+  .customer-print-ar-dialog,
+  .customer-print-ar-surface {
+    width: min(960px, calc(100vw - 36px));
+    max-height: calc(100vh - 36px);
+  }
+
+  .customer-print-ar-header {
+    padding: 22px 20px 18px;
+  }
+
+  .customer-print-ar-title,
+  .customer-print-ar-heading,
+  .customer-print-ar-product-title {
+    font-size: clamp(30px, 4.2vw, 40px);
+    max-width: 18ch;
+  }
+
+  .customer-print-ar-layout,
+  .customer-print-ar-grid,
+  .customer-print-ar-body {
+    padding: 24px 16px 16px;
+  }
+
+  .customer-print-ar-preview-wrap,
+  .customer-print-ar-preview-card,
+  .customer-print-ar-stage,
+  .customer-print-ar-scene {
+    min-height: 460px;
+  }
+}
+
+/* Small screens */
+@media (max-width: 760px) {
+  .customer-print-ar-shell,
+  .customer-print-ar-dialog,
+  .customer-print-ar-surface {
+    width: calc(100vw - 20px);
+    max-height: calc(100vh - 20px);
+    border-radius: 16px;
+  }
+
+  .customer-print-ar-header {
+    padding: 18px 16px 16px;
+  }
+
+  .customer-print-ar-title,
+  .customer-print-ar-heading,
+  .customer-print-ar-product-title {
+    font-size: clamp(26px, 8vw, 34px);
+    line-height: 1;
+    max-width: 15ch;
+  }
+
+  .customer-print-ar-close,
+  .customer-print-ar-btn-close {
+    min-height: 42px;
+    padding: 0 15px;
+    font-size: 13px;
+  }
+
+  .customer-print-ar-layout,
+  .customer-print-ar-grid,
+  .customer-print-ar-body {
+    padding: 16px 12px 12px;
+    gap: 12px;
+  }
+
+  .customer-print-ar-preview-wrap,
+  .customer-print-ar-preview-card,
+  .customer-print-ar-stage,
+  .customer-print-ar-scene {
+    min-height: 360px;
+  }
+
+  .customer-print-ar-sidebar,
+  .customer-print-ar-summary,
+  .customer-print-ar-panel {
+    padding: 16px 12px;
+  }
+
+  .customer-print-ar-btn,
+  .customer-print-ar-action,
+  .customer-print-ar-cta {
+    min-height: 46px;
+    padding: 0 16px;
+    font-size: 13px;
+  }
+}
+
+.customer-print-ar-panel {
+  width: min(1140px, 100%);
+  max-height: 92vh;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+  background: rgba(11, 13, 18, 0.98);
+  box-shadow: 0 24px 72px rgba(0, 0, 0, 0.45);
+}
+
+.customer-print-ar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.customer-print-ar-eyebrow {
+  margin-bottom: 8px;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.customer-print-ar-header h2 {
+  margin: 0;
+  font-size: clamp(30px, 4vw, 44px);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.customer-print-ar-body {
+  min-height: 0;
+  overflow: auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 380px);
+  gap: 16px;
+  padding: 18px;
+}
+
+.customer-print-ar-canvas {
+  position: relative;
+  isolation: isolate;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  min-height: clamp(320px, 54vh, 760px);
+  max-height: 76vh;
+  background: linear-gradient(180deg, #11161f 0%, #090b10 100%);
+}
+
+.customer-print-ar-summary {
+  align-self: start;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 14px;
+}
+
+.customer-print-ar-frame-picker {
+  margin-bottom: 12px;
+}
+
+.customer-print-ar-frame-picker__label {
+  margin-bottom: 8px;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.customer-print-ar-frame-picker__controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.customer-print-ar-frame-pill {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.78);
+  font: inherit;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.customer-print-ar-frame-pill:hover {
+  border-color: rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.customer-print-ar-frame-pill--active {
+  border-color: rgba(154, 204, 255, 0.36);
+  background: rgba(94, 164, 255, 0.18);
+  color: rgba(255, 255, 255, 0.94);
+}
+
+.customer-print-ar-summary-list {
+  display: grid;
+}
+
+.customer-print-ar-summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.customer-print-ar-summary-row:last-child {
+  border-bottom: 0;
+}
+
+.customer-print-ar-summary-row span {
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.customer-print-ar-summary-row strong {
+  text-align: right;
+  color: rgba(255, 255, 255, 0.94);
+}
+
+.customer-print-ar-state {
+  margin-top: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 11px 12px;
+}
+
+.customer-print-ar-state strong {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.customer-print-ar-state p {
+  margin: 6px 0 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.customer-print-ar-state--ready {
+  border-color: rgba(132, 255, 182, 0.22);
+  background: rgba(80, 255, 140, 0.05);
+}
+
+.customer-print-ar-state--partial {
+  border-color: rgba(255, 214, 133, 0.24);
+  background: rgba(255, 190, 84, 0.06);
+}
+
+.customer-print-ar-state--unavailable {
+  border-color: rgba(255, 161, 161, 0.22);
+  background: rgba(255, 96, 96, 0.05);
+}
+
+.customer-print-ar-note {
+  margin: 12px 0 0;
+  color: rgba(255, 255, 255, 0.68);
+  line-height: 1.55;
+  font-size: 13px;
+}
+
+.customer-print-ar-actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.customer-print-ar-btn {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  padding: 11px 15px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.92);
+  text-decoration: none;
+  cursor: pointer;
+  font: inherit;
+  transition: 0.2s ease;
+}
+
+.customer-print-ar-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.customer-print-ar-btn--primary {
+  border-color: rgba(154, 204, 255, 0.36);
+  background: rgba(94, 164, 255, 0.2);
+}
+
+.customer-print-ar-btn--secondary {
+  border-color: rgba(255, 214, 133, 0.3);
+  background: rgba(255, 190, 84, 0.14);
+}
+
+.customer-print-ar-btn--ghost {
+  background: transparent;
+}
+
+.customer-print-ar-btn--full {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.customer-print-ar-btn[disabled],
+.customer-print-ar-btn[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}
+
+.interactive-print-preview-3d,
+.print-ar-host-scene,
+.print-ar-host-scene--state {
+  width: 100%;
+  height: 100%;
+  min-height: clamp(320px, 54vh, 760px);
+  position: relative;
+}
+
+.interactive-print-preview-3d canvas,
+.print-ar-host-scene canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.print-ar-host-note {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  padding: 8px 11px;
+  background: rgba(8, 10, 14, 0.75);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 12px;
+}
+
+.print-ar-host-note--error {
+  border-color: rgba(255, 144, 144, 0.26);
+  color: rgba(255, 214, 214, 0.94);
+}
+
+@media (max-width: 980px) {
+  .customer-print-ar-body {
+    grid-template-columns: 1fr;
+  }
+
+  .customer-print-ar-canvas {
+    max-height: 58vh;
+  }
+}
+
+@media (max-width: 760px) {
+  .customer-print-ar-backdrop {
+    padding: 10px;
+  }
+
+  .customer-print-ar-header {
+    padding: 16px 14px;
+  }
+
+  .customer-print-ar-body {
+    padding: 12px;
+  }
+
+  .customer-print-ar-summary-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .customer-print-ar-summary-row strong {
+    text-align: left;
+  }
+
+  .customer-print-ar-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* =========================================================
+   WHISPER Pass 1.1 - visual polish overrides
+   Premium / minimal / collector-facing
+   Append this block at the very end of the file.
+   ========================================================= */
+
+:root {
+  --whisper-ar-bg: rgba(7, 10, 16, 0.94);
+  --whisper-ar-bg-soft: rgba(10, 14, 20, 0.88);
+  --whisper-ar-surface: rgba(14, 18, 24, 0.86);
+  --whisper-ar-surface-2: rgba(18, 22, 28, 0.92);
+  --whisper-ar-border: rgba(255, 255, 255, 0.08);
+  --whisper-ar-border-strong: rgba(255, 255, 255, 0.14);
+  --whisper-ar-text: rgba(255, 255, 255, 0.92);
+  --whisper-ar-text-soft: rgba(255, 255, 255, 0.62);
+  --whisper-ar-text-dim: rgba(255, 255, 255, 0.42);
+  --whisper-ar-accent: rgba(223, 216, 201, 0.22);
+  --whisper-ar-accent-strong: rgba(223, 216, 201, 0.36);
+  --whisper-ar-warm: rgba(223, 216, 201, 0.12);
+  --whisper-ar-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.42),
+    0 4px 24px rgba(0, 0, 0, 0.24);
+}
+
+/* Outer modal / shell */
+.customer-print-ar-overlay,
+.customer-print-ar-root,
+.customer-print-ar-modal {
+  backdrop-filter: blur(12px);
+}
+
+.customer-print-ar-shell,
+.customer-print-ar-dialog,
+.customer-print-ar-surface {
+  background:
+    linear-gradient(180deg, rgba(8, 11, 16, 0.97) 0%, rgba(10, 13, 18, 0.96) 100%);
+  border: 1px solid var(--whisper-ar-border);
+  box-shadow: var(--whisper-ar-shadow);
+  border-radius: 22px;
+}
+
+/* Header */
+.customer-print-ar-header {
+  border-bottom: 1px solid var(--whisper-ar-border);
+  padding-bottom: 18px;
+  margin-bottom: 18px;
+}
+
+.customer-print-ar-kicker,
+.customer-print-ar-label,
+.customer-print-ar-eyebrow {
+  color: var(--whisper-ar-text-dim);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+
+.customer-print-ar-title,
+.customer-print-ar-heading,
+.customer-print-ar-product-title {
+  color: var(--whisper-ar-text);
+  font-size: clamp(38px, 4.2vw, 58px);
+  line-height: 0.98;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  max-width: 12ch;
+  margin: 0;
+}
+
+.customer-print-ar-close,
+.customer-print-ar-btn-close {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--whisper-ar-border-strong);
+  color: var(--whisper-ar-text);
+  border-radius: 999px;
+  min-height: 48px;
+  padding: 0 18px;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease;
+}
+
+.customer-print-ar-close:hover,
+.customer-print-ar-btn-close:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.18);
+  transform: translateY(-1px);
+}
+
+/* Main content layout */
+.customer-print-ar-layout,
+.customer-print-ar-grid,
+.customer-print-ar-body {
+  gap: 18px;
+}
+
+/* Preview stage */
+.customer-print-ar-preview-wrap,
+.customer-print-ar-preview-card,
+.customer-print-ar-stage,
+.customer-print-ar-scene {
+  border: 1px solid var(--whisper-ar-border);
+  border-radius: 20px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 24%, rgba(35, 52, 82, 0.28), rgba(7, 13, 24, 0.08) 36%, rgba(5, 8, 12, 0.92) 78%),
+    linear-gradient(180deg, rgba(8, 10, 14, 0.98) 0%, rgba(5, 7, 11, 0.98) 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+}
+
+.customer-print-ar-preview-inner,
+.customer-print-ar-canvas-wrap {
+  background:
+    radial-gradient(circle at 50% 20%, rgba(40, 60, 95, 0.18), rgba(8, 12, 18, 0.02) 42%, rgba(5, 7, 11, 0) 70%);
+}
+
+/* Right summary panel */
+.customer-print-ar-sidebar,
+.customer-print-ar-summary,
+.customer-print-ar-panel {
+  background: linear-gradient(180deg, rgba(12, 16, 22, 0.88) 0%, rgba(12, 16, 21, 0.94) 100%);
+  border: 1px solid var(--whisper-ar-border);
+  border-radius: 20px;
+}
+
+.customer-print-ar-summary h2,
+.customer-print-ar-summary h3,
+.customer-print-ar-panel h2,
+.customer-print-ar-panel h3 {
+  color: var(--whisper-ar-text);
+}
+
+.customer-print-ar-summary p,
+.customer-print-ar-summary li,
+.customer-print-ar-panel p,
+.customer-print-ar-panel li {
+  color: var(--whisper-ar-text-soft);
+}
+
+/* Key/value rows */
+.customer-print-ar-meta-row,
+.customer-print-ar-kv-row,
+.customer-print-ar-stat-row {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.customer-print-ar-meta-row:first-child,
+.customer-print-ar-kv-row:first-child,
+.customer-print-ar-stat-row:first-child {
+  border-top: 0;
+}
+
+.customer-print-ar-meta-label,
+.customer-print-ar-kv-label,
+.customer-print-ar-stat-label {
+  color: var(--whisper-ar-text-soft);
+}
+
+.customer-print-ar-meta-value,
+.customer-print-ar-kv-value,
+.customer-print-ar-stat-value {
+  color: var(--whisper-ar-text);
+  font-weight: 600;
+}
+
+/* Frame pills */
+.customer-print-ar-frame-pill,
+.customer-print-ar-chip,
+.customer-print-ar-segment {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.72);
+  border-radius: 999px;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease;
+}
+
+.customer-print-ar-frame-pill:hover,
+.customer-print-ar-chip:hover,
+.customer-print-ar-segment:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.customer-print-ar-frame-pill--active,
+.customer-print-ar-chip--active,
+.customer-print-ar-segment--active,
+.customer-print-ar-frame-pill[aria-pressed="true"],
+.customer-print-ar-chip[aria-pressed="true"],
+.customer-print-ar-segment[aria-pressed="true"] {
+  background: rgba(223, 216, 201, 0.10);
+  border-color: var(--whisper-ar-accent-strong);
+  color: rgba(255, 255, 255, 0.96);
+  box-shadow: inset 0 0 0 1px rgba(223, 216, 201, 0.05);
+}
+
+/* Buttons */
+.customer-print-ar-btn,
+.customer-print-ar-action,
+.customer-print-ar-cta {
+  border-radius: 999px;
+  min-height: 50px;
+  padding: 0 22px;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease,
+    opacity 180ms ease;
+}
+
+.customer-print-ar-btn:hover,
+.customer-print-ar-action:hover,
+.customer-print-ar-cta:hover {
+  transform: translateY(-1px);
+}
+
+.customer-print-ar-btn--primary,
+.customer-print-ar-action--primary,
+.customer-print-ar-cta--primary {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.94);
+}
+
+.customer-print-ar-btn--primary:hover,
+.customer-print-ar-action--primary:hover,
+.customer-print-ar-cta--primary:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+.customer-print-ar-btn--secondary,
+.customer-print-ar-action--secondary,
+.customer-print-ar-cta--secondary {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.customer-print-ar-btn--secondary:hover,
+.customer-print-ar-action--secondary:hover,
+.customer-print-ar-cta--secondary:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.customer-print-ar-btn[disabled],
+.customer-print-ar-action[disabled],
+.customer-print-ar-cta[disabled],
+.customer-print-ar-btn:disabled,
+.customer-print-ar-action:disabled,
+.customer-print-ar-cta:disabled {
+  opacity: 0.52;
+  transform: none;
+  cursor: default;
+}
+
+/* State cards */
+.customer-print-ar-state,
+.customer-print-ar-status-card,
+.customer-print-ar-notice {
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.customer-print-ar-state--ready {
+  border-color: rgba(223, 216, 201, 0.16);
+  background: rgba(223, 216, 201, 0.05);
+}
+
+.customer-print-ar-state--partial {
+  border-color: rgba(223, 216, 201, 0.12);
+  background: rgba(223, 216, 201, 0.04);
+}
+
+.customer-print-ar-state--unavailable {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.customer-print-ar-state-title,
+.customer-print-ar-status-title {
+  color: var(--whisper-ar-text);
+}
+
+.customer-print-ar-state-copy,
+.customer-print-ar-status-copy,
+.customer-print-ar-unavailable-copy {
+  color: var(--whisper-ar-text-soft);
+}
+
+/* Secondary notes */
+.customer-print-ar-note,
+.customer-print-ar-footnote,
+.customer-print-ar-caption,
+.customer-print-ar-helper {
+  color: var(--whisper-ar-text-dim);
+}
+
+/* Slightly calmer spacing on smaller screens */
+@media (max-width: 1100px) {
+  .customer-print-ar-title,
+  .customer-print-ar-heading,
+  .customer-print-ar-product-title {
+    font-size: clamp(28px, 5vw, 42px);
+    max-width: none;
+  }
+
+  .customer-print-ar-shell,
+  .customer-print-ar-dialog,
+  .customer-print-ar-surface {
+    border-radius: 18px;
+  }
+
+  .customer-print-ar-preview-wrap,
+  .customer-print-ar-preview-card,
+  .customer-print-ar-stage,
+  .customer-print-ar-scene,
+  .customer-print-ar-sidebar,
+  .customer-print-ar-summary,
+  .customer-print-ar-panel {
+    border-radius: 16px;
+  }
+}

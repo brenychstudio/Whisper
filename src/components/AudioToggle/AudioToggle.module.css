@@ -1,0 +1,14 @@
+.btn{
+  background: transparent;
+  border: 0;
+  color: rgba(255,255,255,0.55);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 8px 6px;
+  cursor: pointer;
+}
+
+.btn:hover{
+  color: var(--fg);
+}

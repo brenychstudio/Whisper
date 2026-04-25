@@ -1,0 +1,288 @@
+.page{
+  width: min(96vw, 1400px);
+  margin: 0 auto;
+  padding: 18px var(--pad) 80px;
+}
+
+.top{
+  margin: 20px 0 30px;
+}
+
+.h1{
+  font-size: 12px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+  padding-bottom: 14px;
+}
+
+.stream{
+  display: flex;
+  flex-direction: column;
+  gap: 250px;
+}
+
+.full{
+  width: 100%;
+}
+
+.window{
+  display: flex;
+  justify-content: center;
+}
+
+.windowInner{
+  width: min(92vw, 980px);
+}
+
+.diptych{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+
+@media (min-width: 900px){
+  .diptych{ grid-template-columns: 1fr 1fr; }
+}
+
+.dipItem{}
+
+.img{
+  width: 100%;
+  height: auto;
+  display: block;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* ---------- reveal (cinematic) ---------- */
+.reveal{
+  opacity: 0;
+  transform: translateY(1px); /* було 10–14px */
+  filter: none;              /* прибрали blur — він дає різкий “поп” */
+  transition:
+    opacity 2000ms cubic-bezier(.16, 1, .3, 1),
+    transform 2800ms cubic-bezier(.16, 1, .3, 1);
+  transition-delay: var(--d, 0ms);
+  will-change: opacity, transform;
+}
+
+.revealIn{
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce){
+  .reveal, .revealIn{
+    transition: none !important;
+    transform: none !important;
+    filter: none !important;
+    opacity: 1 !important;
+  }
+}
+
+/* ---------- text inserts (between frames) ---------- */
+.textBlock{
+  display: flex;
+  justify-content: center;
+  padding: 18px 0;
+}
+
+.textInner{
+  width: min(92vw, 980px);
+  padding: 18px 0;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.textCenter{ text-align: center; }
+.textLeft{ text-align: left; }
+.textRight{ text-align: right; }
+
+.textEyebrow{
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.52);
+}
+
+.textHeadline{
+  margin-top: 10px;
+  font-family: var(--font-serif, ui-serif, Georgia, "Times New Roman", serif);
+  font-size: 20px;
+  letter-spacing: 0.04em;
+  color: rgba(255,255,255,0.88);
+}
+
+.textBody{
+  margin: 12px auto 0;
+  max-width: 62ch;
+  font-size: 13px;
+  line-height: 1.9;
+  color: rgba(255,255,255,0.70);
+}
+@media (min-width: 1100px){
+  .stream{ gap: 96px; }
+}
+@media (max-width: 700px){
+  .stream{ gap: 68px; }
+}
+/* --- series title micro-reveal --- */
+.titleReveal{
+  opacity: 0;
+   letter-spacing: 0.34em;
+  transform: translateY(4px);
+  transition:
+    opacity 700ms cubic-bezier(.16, 1, .3, 1),
+    transform 900ms cubic-bezier(.16, 1, .3, 1);
+  transition-delay: 90ms;
+  will-change: opacity, transform;
+}
+
+.page{
+  /* щоб при кожному вході/оновленні заголовок проходив reveal */
+  animation: titleKick 1ms linear both;
+}
+
+@keyframes titleKick{
+  from { }
+  to { }
+}
+
+/* коли сторінка змонтована — “включаємо” */
+.page .titleReveal{
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce){
+  .titleReveal{
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* --- Slower cinematic reveal override --- */
+.reveal{
+  opacity: 0;
+  transform: translate3d(0, 18px, 0) scale(0.996);
+  filter: blur(5px);
+
+  transition-property: opacity, transform, filter;
+  transition-duration: 1800ms, 2200ms, 700ms; /* ✅ повільніше */
+  transition-timing-function:
+    cubic-bezier(0.16, 1, 0.3, 1),
+    cubic-bezier(0.16, 1, 0.3, 1),
+    cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ✅ додаємо невеликий базовий delay + твій stagger */
+  transition-delay: calc(var(--d, 0ms) + 140ms);
+
+  will-change: opacity, transform, filter;
+}
+
+.revealIn{
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+  filter: blur(0);
+}
+
+@media (prefers-reduced-motion: reduce){
+  .reveal{
+    transition: none;
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+/* --- Variant C: тихий CTA під кадром (Series → Prints) --- */
+.frameFooter{
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.10);
+  position: relative;
+  min-height: 22px;
+}
+
+.frameLabel{
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.52);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 96px; /* залишаємо місце під CTA справа */
+}
+
+.printCta{
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+
+  padding: 6px 0 6px 10px;
+  background: transparent;
+  border: 0;
+
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-decoration: none;
+
+  color: rgba(255,255,255,0.56);
+  opacity: 0.70;
+
+  transition:
+    opacity var(--t-hover, 160ms) var(--ease-out, cubic-bezier(.16,1,.3,1)),
+    color var(--t-hover, 160ms) var(--ease-out, cubic-bezier(.16,1,.3,1));
+}
+
+.printCtaLabel{
+  color: inherit;
+}
+
+.printCtaMeta{
+  color: rgba(255,255,255,0.48);
+  letter-spacing: 0.16em;
+}
+
+.printCtaArrow{
+  display: inline-block;
+  transform: translateX(0);
+  transition: transform var(--t-hover, 160ms) var(--ease-out, cubic-bezier(.16,1,.3,1));
+}
+
+.frameFooter:hover .printCta,
+.printCta:focus-visible{
+  opacity: 1;
+  color: rgba(255,255,255,0.90);
+}
+
+.frameFooter:hover .printCtaMeta,
+.printCta:focus-visible .printCtaMeta{
+  color: rgba(255,255,255,0.66);
+}
+
+.frameFooter:hover .printCtaArrow,
+.printCta:focus-visible .printCtaArrow{
+  transform: translateX(4px);
+}
+
+.printCta:focus-visible{
+  outline: 2px solid rgba(255,255,255,0.26);
+  outline-offset: 4px;
+  border-radius: 999px;
+}
+
+@media (max-width: 700px){
+  .frameFooter{ padding-top: 10px; margin-top: 10px; }
+  .printCta{ opacity: 0.84; font-size: 10px; letter-spacing: 0.20em; }
+}

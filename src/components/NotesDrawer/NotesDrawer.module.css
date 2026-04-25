@@ -1,0 +1,129 @@
+.backdrop{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.62);
+  z-index: 120;
+  display: flex;
+  justify-content: flex-end;
+
+  /* base (hidden) */
+  opacity: 0;
+  transition: opacity var(--t-backdrop) var(--ease);
+  will-change: opacity;
+}
+
+.backdropIn{
+  opacity: 1;
+}
+
+.drawer{
+  width: min(92vw, 520px);
+  height: 100%;
+  background: rgba(10,10,14,0.92);
+  backdrop-filter: blur(10px);
+  border-left: 1px solid rgba(255,255,255,0.10);
+  padding: 18px;
+  overflow: auto;
+
+  /* base (hidden) */
+  transform: translate3d(18px, 0, 0);
+  opacity: 0;
+  filter: blur(10px);
+  transition:
+    transform var(--t-drawer-move) var(--ease),
+    opacity var(--t-drawer-opacity) var(--ease),
+    filter var(--t-drawer-filter) var(--ease);
+  will-change: transform, opacity, filter;
+}
+
+.drawerIn{
+  transform: translate3d(0, 0, 0);
+  opacity: 1;
+  filter: blur(0px);
+}
+
+.head{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+}
+
+.title{
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.close{
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.14);
+  color: var(--fg);
+  padding: 8px 10px;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+
+  transition: border-color var(--t-hover) var(--ease), color var(--t-hover) var(--ease), transform var(--t-hover) var(--ease);
+}
+.close:hover{
+  border-color: rgba(255,255,255,0.22);
+  color: rgba(255,255,255,0.92);
+  transform: translate3d(0,-1px,0);
+}
+
+.body{
+  padding: 18px 2px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.section{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label{
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+}
+
+.text{
+  color: rgba(255,255,255,0.78);
+  line-height: 1.85;
+  font-size: 13px;
+}
+
+.list{
+  margin: 0;
+  padding-left: 18px;
+  color: rgba(255,255,255,0.78);
+  line-height: 1.85;
+  font-size: 13px;
+}
+
+.link{
+  color: rgba(255,255,255,0.86);
+  border-bottom: 1px solid rgba(255,255,255,0.16);
+  padding-bottom: 2px;
+  text-decoration: none;
+}
+.link:hover{
+  border-bottom-color: rgba(255,255,255,0.26);
+}
+
+@media (prefers-reduced-motion: reduce){
+  .backdrop, .drawer, .close{
+    transition: none !important;
+    transform: none !important;
+    filter: none !important;
+    opacity: 1 !important;
+  }
+}

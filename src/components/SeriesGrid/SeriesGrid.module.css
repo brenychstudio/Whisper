@@ -1,0 +1,106 @@
+.grid{
+  display: grid;
+  grid-template-columns: 1fr;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+@media (min-width: 900px){
+  .grid{ grid-template-columns: 1fr 1fr; }
+}
+
+.tile{
+  position: relative;
+  border: 0;
+  padding: 0;
+  height: 100%;
+  background-color: #0a0a0d;
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+  min-height: 50vh;
+  overflow: hidden;
+
+  /* було 240ms — зробили повільніше/дороже */
+  transition: filter 420ms var(--ease), transform 520ms var(--ease);
+  will-change: transform, filter;
+}
+
+.scrim{
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0,0,0,0.06) 0%,
+    rgba(0,0,0,0.18) 55%,
+    rgba(0,0,0,0.52) 100%
+  );
+}
+
+.inner{
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+
+  align-items: center;
+  text-align: center;
+
+  padding: 34px;
+  gap: 10px;
+
+  transform: translateY(0);
+
+  /* було 700ms — зробили коротше й “cinematic” */
+  transition: transform 520ms var(--ease);
+}
+
+.title{
+  font-family: var(--font-serif);
+  font-size: 26px;
+  letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.92);
+  text-shadow: 0 1px 18px rgba(0,0,0,0.55);
+}
+
+.line{
+  color: rgba(255,255,255,0.68);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  line-height: 1.6;
+
+  max-width: 52ch;
+  margin: 0 auto;
+  text-shadow: 0 1px 14px rgba(0,0,0,0.55);
+}
+
+.view{
+  margin-top: 10px;
+  font-size: 11px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.78);
+  text-shadow: 0 1px 14px rgba(0,0,0,0.55);
+}
+
+/* було -6px — зробили -4px (тонше) */
+.tile:hover .inner{
+  transform: translateY(-4px);
+}
+
+.tile:hover{
+  filter: saturate(1.03) contrast(1.05);
+  /* було 1.02 — зробили 1.01 */
+  transform: scale(1.01);
+}
+
+.tile img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  will-change: transform, filter;
+  transition: transform 900ms var(--ease), filter 600ms var(--ease);
+  transform: scale(1);
+}
