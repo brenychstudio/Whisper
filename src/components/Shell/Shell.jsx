@@ -24,12 +24,14 @@ export default function Shell({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [notesOpen, setNotesOpen] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const PAGE_TRANSITION_MS = useMemo(() => readVarMs("--t-page", PAGE_TRANSITION_FALLBACK_MS), []);
   const NAV_CUT_MS = useMemo(() => readVarMs("--t-cut", NAV_CUT_FALLBACK_MS), []);
 
   const [uiPath, setUiPath] = useState(location.pathname);
   const uiTimer = useRef(null);
+  const mobileNavTimer = useRef(null);
 
   const prefersReduced = () =>
     typeof window !== "undefined" &&
@@ -40,7 +42,9 @@ export default function Shell({ children }) {
     window.clearTimeout(uiTimer.current);
 
     if (prefersReduced()) {
-      setUiPath(location.pathname);
+      uiTimer.current = window.setTimeout(() => {
+        setUiPath(location.pathname);
+      }, 0);
       return;
     }
 
@@ -77,6 +81,28 @@ export default function Shell({ children }) {
     if (uiPath.startsWith("/series")) return "/series";
     return uiPath;
   }, [uiPath]);
+
+  useEffect(() => {
+    window.clearTimeout(mobileNavTimer.current);
+    mobileNavTimer.current = window.setTimeout(() => {
+      setMobileNavOpen(false);
+    }, 0);
+
+    return () => window.clearTimeout(mobileNavTimer.current);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!mobileNavOpen) return;
+
+    function onKeyDown(event) {
+      if (event.key === "Escape") {
+        setMobileNavOpen(false);
+      }
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [mobileNavOpen]);
 
   const [curtainOn, setCurtainOn] = useState(false);
   const navLock = useRef(false);
@@ -123,10 +149,13 @@ export default function Shell({ children }) {
       window.clearTimeout(navTimer.current);
       window.clearTimeout(offTimer.current);
       window.clearTimeout(uiTimer.current);
+      window.clearTimeout(mobileNavTimer.current);
     };
   }, []);
 
   function onNavClick(item) {
+    setMobileNavOpen(false);
+
     if (item.to === "__notes__") {
       setNotesOpen(true);
       return;
@@ -151,38 +180,60 @@ export default function Shell({ children }) {
       ) : null}
 
       {!isXRKiosk ? (
-        <header className={styles.header}>
-          <div
-            className={styles.brand}
-            onClick={() => cinematicNavigate("/")}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") cinematicNavigate("/");
-            }}
-            role="button"
-            tabIndex={0}
-          >
-            <span className={styles.brandTitle}>{site.title}</span>
-          </div>
+        <>
+          <header className={styles.header}>
+            <div
+              className={styles.brand}
+              onClick={() => cinematicNavigate("/")}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") cinematicNavigate("/");
+              }}
+              role="button"
+              tabIndex={0}
+            >
+              <span className={styles.brandTitle}>{site.title}</span>
+            </div>
 
-          <nav className={styles.nav}>
-            {site.nav.map((item) => {
-              const isNotes = item.to === "__notes__";
-              const isActive = !isNotes && item.to === activePath;
+            <button
+              className={`${styles.mobileNavToggle} ${mobileNavOpen ? styles.mobileNavToggleOpen : ""}`}
+              type="button"
+              aria-label={mobileNavOpen ? "Close menu" : "Open menu"}
+              aria-expanded={mobileNavOpen}
+              onClick={() => setMobileNavOpen((value) => !value)}
+            >
+              {mobileNavOpen ? "Close" : "Menu"}
+            </button>
 
-              return (
-                <button
-                  key={item.label}
-                  className={`${styles.navBtn} ${isActive ? styles.navBtnActive : ""}`}
-                  onClick={() => onNavClick(item)}
-                  type="button"
-                >
-                  {item.label}
-                </button>
-              );
-            })}
-            <AudioToggle />
-          </nav>
-        </header>
+            <nav
+              className={`${styles.nav} ${mobileNavOpen ? styles.navOpen : ""}`}
+              aria-label="Main navigation"
+            >
+              {site.nav.map((item) => {
+                const isNotes = item.to === "__notes__";
+                const isActive = !isNotes && item.to === activePath;
+
+                return (
+                  <button
+                    key={item.label}
+                    className={`${styles.navBtn} ${isActive ? styles.navBtnActive : ""}`}
+                    onClick={() => onNavClick(item)}
+                    type="button"
+                  >
+                    {item.label}
+                  </button>
+                );
+              })}
+              <AudioToggle />
+            </nav>
+          </header>
+
+          <button
+            className={`${styles.mobileNavBackdrop} ${mobileNavOpen ? styles.mobileNavBackdropOpen : ""}`}
+            type="button"
+            aria-label="Close menu"
+            onClick={() => setMobileNavOpen(false)}
+          />
+        </>
       ) : null}
 
       <main className={`${styles.main} ${isFullBleed ? styles.mainFullBleed : ""}`}>
