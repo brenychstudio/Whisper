@@ -286,3 +286,123 @@
   .frameFooter{ padding-top: 10px; margin-top: 10px; }
   .printCta{ opacity: 0.84; font-size: 10px; letter-spacing: 0.20em; }
 }
+
+/* =========================================================
+   WHISPER Mobile / Tablet QA Pass 1
+   Editorial series reliability + mobile composition
+   ========================================================= */
+
+.img[data-load-error="1"] {
+  min-height: 42vh;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(255,255,255,0.06), rgba(255,255,255,0.015) 42%, rgba(0,0,0,0.28) 100%),
+    rgba(255,255,255,0.025);
+}
+
+@media (max-width: 1024px) {
+  .page {
+    width: min(94vw, 980px);
+    padding: calc(var(--header-h) + 18px) 0 72px;
+  }
+
+  .top {
+    margin: 8px 0 28px;
+  }
+
+  .h1 {
+    font-size: 11px;
+    letter-spacing: 0.24em;
+    padding-bottom: 12px;
+  }
+
+  .stream {
+    gap: 84px;
+  }
+
+  .windowInner {
+    width: 100%;
+  }
+
+  .img {
+    width: 100%;
+    height: auto;
+    min-height: 1px;
+    object-fit: contain;
+    background: rgba(255,255,255,0.018);
+  }
+
+  .textInner {
+    width: 100%;
+  }
+
+  .frameFooter {
+    padding-top: 10px;
+  }
+
+  .frameLabel {
+    display: none;
+  }
+
+  .printCta {
+    position: static;
+    transform: none;
+    width: 100%;
+    justify-content: center;
+    padding: 8px 0;
+    opacity: 0.84;
+  }
+}
+
+@media (max-width: 700px) {
+  .page {
+    width: min(92vw, 560px);
+    padding: calc(var(--header-h) + 22px) 0 64px;
+  }
+
+  .stream {
+    gap: 64px;
+  }
+
+  .full,
+  .window,
+  .windowInner,
+  .diptych,
+  .dipItem {
+    width: 100%;
+  }
+
+  .diptych {
+    gap: 64px;
+  }
+
+  .textBlock {
+    padding: 8px 0;
+  }
+
+  .textInner {
+    padding: 16px 0;
+  }
+
+  .textHeadline {
+    font-size: 18px;
+  }
+
+  .textBody {
+    font-size: 13px;
+    line-height: 1.75;
+  }
+
+  /* Emergency reliability on mobile:
+     images must never stay invisible because of reveal/observer timing. */
+  .reveal,
+  .revealIn {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    transition: none !important;
+  }
+
+  .img {
+    border-color: rgba(255,255,255,0.075);
+  }
+}

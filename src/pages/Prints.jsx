@@ -209,7 +209,36 @@ export default function Prints() {
     return normalizedFiltered.find((p) => p.id === stageId) || normalizedFiltered[0];
   }, [normalizedFiltered, stageId]);
 
-  // keep stage selection valid when filter changes
+  function updatePrintParam(nextId, { replace } = {}) {
+    const next = new URLSearchParams(searchParams);
+    if (nextId) next.set("print", nextId);
+    else next.delete("print");
+    setSearchParams(next, { replace: !!replace });
+  }
+
+  // modal close helpers
+  function closeModal() {
+    const hasPrintParam = !!searchParams.get("print");
+
+    setModalOn(false);
+    // let the modal fade out first
+    window.setTimeout(() => {
+      setBackdropOn(false);
+      setActive(null);
+    }, MODAL_MS);
+
+    if (!hasPrintParam) return;
+
+    // If user landed directly on a deep-link, keep them on /prints and just clear the param.
+    if (deepLinkedRef.current) {
+      updatePrintParam(null, { replace: true });
+      return;
+    }
+
+    // If modal was opened from within /prints, go back to the previous history entry.
+    navigate(-1);
+  }
+
   useEffect(() => {
     if (!normalizedFiltered.length) return;
     if (!stageId || !normalizedFiltered.some((p) => p.id === stageId)) {
@@ -330,13 +359,6 @@ requestAnimationFrame(() => {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [active?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  function updatePrintParam(nextId, { replace } = {}) {
-    const next = new URLSearchParams(searchParams);
-    if (nextId) next.set("print", nextId);
-    else next.delete("print");
-    setSearchParams(next, { replace: !!replace });
-  }
-
   function getShareUrl(id) {
   const base =
     site?.url && String(site.url).trim()
@@ -433,28 +455,6 @@ requestAnimationFrame(() => {
         console.warn("[Print AR] Failed to open customer preview", error);
       }
     }
-  }
-
-  function closeModal() {
-    const hasPrintParam = !!searchParams.get("print");
-
-    setModalOn(false);
-    // let the modal fade out first
-    window.setTimeout(() => {
-      setBackdropOn(false);
-      setActive(null);
-    }, MODAL_MS);
-
-    if (!hasPrintParam) return;
-
-    // If user landed directly on a deep-link, keep them on /prints and just clear the param.
-    if (deepLinkedRef.current) {
-      updatePrintParam(null, { replace: true });
-      return;
-    }
-
-    // If modal was opened from within /prints, go back to the previous history entry.
-    navigate(-1);
   }
 
   const FilterBtn = ({ id, label }) => {
@@ -1249,9 +1249,9 @@ requestAnimationFrame(() => {
                   <button
                     type="button"
                     onClick={() => {
-                      const email = (site.purchaseEmail || "").trim() || "artproject@concept2048.com";
-                      const subject = (site.purchaseSubject || "").trim() || "Print purchase request";
-                      const body = [
+                      const _email = (site.purchaseEmail || "").trim() || "artproject@concept2048.com";
+                      const _subject = (site.purchaseSubject || "").trim() || "Print purchase request";
+                      const _body = [
                         "Hello,",
                         "",
                         "I'd like to purchase the following print:",
@@ -1268,9 +1268,9 @@ requestAnimationFrame(() => {
                         "Thank you.",
                       ].join("\n");
 
-                      const mailto = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(
-                        subject
-                      )}&body=${encodeURIComponent(body)}`;
+                      const _mailto = `mailto:${encodeURIComponent(_email)}?subject=${encodeURIComponent(
+                        _subject
+                      )}&body=${encodeURIComponent(_body)}`;
 
                       window.location.href = buildPurchaseMailto(activeObj, activeSizeObj, priceForSize);
                     }}
@@ -1315,7 +1315,28 @@ requestAnimationFrame(() => {
             /* responsive modal */
             @media (max-width: 900px){
               .__prints_modal_fix{
+                width: min(94vw, 760px) !important;
+                max-height: calc(100dvh - 28px) !important;
                 grid-template-columns: 1fr !important;
+                overflow: auto !important;
+              }
+
+              .__prints_media{
+                min-height: 46vh !important;
+                border-right: 0 !important;
+                border-bottom: 1px solid rgba(255,255,255,0.10) !important;
+              }
+            }
+
+            @media (max-width: 700px){
+              .__prints_modal_fix{
+                width: calc(100vw - 20px) !important;
+                max-height: calc(100dvh - 20px) !important;
+                border-radius: 12px !important;
+              }
+
+              .__prints_media{
+                min-height: 36vh !important;
               }
             }
           `}</style>

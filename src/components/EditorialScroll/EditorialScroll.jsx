@@ -3,20 +3,21 @@ import { Link } from "react-router-dom";
 import styles from "./EditorialScroll.module.css";
 import ScrollVideoStage from "../ScrollVideoStage/ScrollVideoStage.jsx";
 
-function Img({ src, srcSmall, alt, onLoad }) {
-  const srcSet = srcSmall ? `${srcSmall} 1100w, ${src} 2800w` : undefined;
-  const sizes = "(max-width: 900px) 92vw, 1200px";
+function Img({ src, srcSmall: _srcSmall, alt, onLoad }) {
+  void _srcSmall;
 
   return (
     <img
       className={styles.img}
       src={src}
-      srcSet={srcSet}
-      sizes={srcSet ? sizes : undefined}
       alt={alt || ""}
       loading="lazy"
       decoding="async"
       onLoad={onLoad}
+      onError={(event) => {
+        event.currentTarget.dataset.loadError = "1";
+        onLoad?.(event);
+      }}
     />
   );
 }

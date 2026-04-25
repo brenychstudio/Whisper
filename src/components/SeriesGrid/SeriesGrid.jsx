@@ -12,9 +12,18 @@ export default function SeriesGrid({ series }) {
           className={styles.tile}
           type="button"
           onClick={() => navigate(`/series/${s.key}`)}
-          style={{ backgroundImage: `url(${s.cover})` }}
         >
+          <img
+            className={styles.cover}
+            src={s.cover}
+            alt=""
+            aria-hidden="true"
+            loading="eager"
+            decoding="async"
+          />
+
           <div className={styles.scrim} aria-hidden="true" />
+
           <div className={styles.inner}>
             <div className={styles.title}>{s.title}</div>
             <div className={styles.line}>{s.shortLine}</div>

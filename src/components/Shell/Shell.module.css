@@ -183,3 +183,63 @@
   }
 }
 
+/* =========================================================
+   WHISPER Mobile / Tablet QA Pass 1
+   Header / nav adaptation
+   ========================================================= */
+
+@media (max-width: 760px) {
+  .header {
+    height: auto;
+    min-height: var(--header-h);
+    padding: 14px 14px 10px;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-direction: column;
+    gap: 10px;
+    background:
+      linear-gradient(180deg, rgba(6,7,10,0.82), rgba(6,7,10,0.38) 74%, rgba(6,7,10,0));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .brandTitle {
+    font-size: 10px;
+    letter-spacing: 0.20em;
+  }
+
+  .nav {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: 6px;
+    padding-bottom: 2px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .navBtn {
+    flex: 0 0 auto;
+    padding: 8px 8px;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+  }
+
+  .main {
+    padding-top: 104px;
+  }
+
+  .mainFullBleed {
+    padding-top: 0;
+  }
+
+  .overlayInner {
+    background:
+      radial-gradient(900px 620px at 50% 42%, transparent 42%, rgba(0,0,0,0.34) 100%);
+  }
+}
