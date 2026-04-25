@@ -430,3 +430,110 @@
       radial-gradient(900px 620px at 50% 42%, transparent 42%, rgba(0, 0, 0, 0.34) 100%);
   }
 }
+
+/* =========================================================
+   WHISPER Mobile Fix Pass
+   Drawer click fix + clean floating header + no horizontal bleed
+   ========================================================= */
+
+@media (max-width: 760px) {
+  html,
+  body,
+  #root {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .header {
+    z-index: 120 !important;
+    height: 72px !important;
+    min-height: 72px !important;
+    padding: 14px 18px 0 !important;
+    background: transparent !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    pointer-events: none;
+  }
+
+  .brand,
+  .mobileNavToggle,
+  .nav {
+    pointer-events: auto;
+  }
+
+  .brand {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 0;
+  }
+
+  .brandTitle {
+    text-shadow: 0 2px 18px rgba(0, 0, 0, 0.62);
+  }
+
+  .mobileNavToggle {
+    z-index: 140 !important;
+    height: 48px;
+    min-width: 104px;
+    padding: 0 22px;
+    background: rgba(6, 8, 12, 0.34);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow:
+      0 10px 34px rgba(0, 0, 0, 0.22),
+      inset 0 1px 0 rgba(255, 255, 255, 0.045);
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    touch-action: manipulation;
+  }
+
+  .mobileNavToggleOpen {
+    background: rgba(10, 12, 17, 0.58);
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+
+  .mobileNavBackdrop {
+    z-index: 90 !important;
+  }
+
+  .mobileNavBackdropOpen {
+    z-index: 90 !important;
+    background: rgba(0, 0, 0, 0.36);
+  }
+
+  .nav {
+    z-index: 130 !important;
+    top: 84px !important;
+    left: 18px !important;
+    right: 18px !important;
+    width: auto !important;
+    max-width: calc(100vw - 36px) !important;
+    box-sizing: border-box;
+    touch-action: manipulation;
+  }
+
+  .navOpen {
+    pointer-events: auto !important;
+  }
+
+  .navBtn {
+    position: relative;
+    z-index: 132;
+    pointer-events: auto !important;
+    touch-action: manipulation;
+  }
+
+  .main {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .mainFullBleed {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+}
