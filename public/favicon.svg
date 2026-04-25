@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="512" y1="0" x2="512" y2="1024" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#041127"></stop>
+      <stop offset="1" stop-color="#020811"></stop>
+    </linearGradient>
+
+    <radialGradient id="halo" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(512 490) rotate(90) scale(350 300)">
+      <stop offset="0" stop-color="#17345F" stop-opacity="0.25"></stop>
+      <stop offset="0.45" stop-color="#0E2341" stop-opacity="0.14"></stop>
+      <stop offset="1" stop-color="#091426" stop-opacity="0"></stop>
+    </radialGradient>
+
+    <filter id="blurLarge" x="0" y="0" width="1024" height="1024" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="28"></feGaussianBlur>
+    </filter>
+
+    <filter id="glow" x="130" y="120" width="770" height="760" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="10" result="blur1"></feGaussianBlur>
+      <feColorMatrix in="blur1" type="matrix" values="1 0 0 0 0.98  0 1 0 0 0.89  0 0 1 0 0.72  0 0 0 0.6 0" result="warmGlow"></feColorMatrix>
+      <feGaussianBlur in="SourceAlpha" stdDeviation="24" result="blur2"></feGaussianBlur>
+      <feColorMatrix in="blur2" type="matrix" values="1 0 0 0 0.86  0 1 0 0 0.72  0 0 1 0 0.46  0 0 0 0.22 0" result="softGlow"></feColorMatrix>
+      <feMerge>
+        <feMergeNode in="softGlow"></feMergeNode>
+        <feMergeNode in="warmGlow"></feMergeNode>
+        <feMergeNode in="SourceGraphic"></feMergeNode>
+      </feMerge>
+    </filter>
+
+    <filter id="shadow" x="130" y="120" width="770" height="760" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="12" stdDeviation="18" flood-color="#000000" flood-opacity="0.35"></feDropShadow>
+    </filter>
+
+    <linearGradient id="letterFill" x1="512" y1="220" x2="512" y2="760" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFF3DC"></stop>
+      <stop offset="1" stop-color="#F2DFC0"></stop>
+    </linearGradient>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#bg)"></rect>
+  <rect width="1024" height="1024" fill="url(#halo)"></rect>
+
+  <g filter="url(#blurLarge)" opacity="0.42">
+    <path d="M220 180C180 260 190 350 235 418C280 487 281 566 236 640C198 703 186 788 224 862" stroke="#2D4E88" stroke-opacity="0.34" stroke-width="16" stroke-linecap="round"></path>
+    <path d="M315 168C287 229 291 306 325 370C367 449 374 536 336 613C302 680 299 761 333 846" stroke="#21406F" stroke-opacity="0.26" stroke-width="14" stroke-linecap="round"></path>
+    <path d="M708 164C744 227 746 315 710 391C669 476 664 557 702 632C736 702 739 786 704 862" stroke="#254878" stroke-opacity="0.30" stroke-width="16" stroke-linecap="round"></path>
+    <path d="M804 192C844 269 838 359 791 430C752 488 749 571 790 650C829 725 841 804 801 869" stroke="#31558B" stroke-opacity="0.26" stroke-width="14" stroke-linecap="round"></path>
+    <path d="M508 140C470 204 474 282 511 356C551 438 551 528 512 608C476 681 470 761 509 882" stroke="#203D6B" stroke-opacity="0.16" stroke-width="12" stroke-linecap="round"></path>
+  </g>
+
+  <g filter="url(#shadow)">
+    <g filter="url(#glow)">
+      <text x="512" y="695" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="660" font-weight="400" letter-spacing="-30" fill="url(#letterFill)">W</text>
+    </g>
+  </g>
+</svg>
