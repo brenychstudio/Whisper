@@ -1312,33 +1312,153 @@ requestAnimationFrame(() => {
           </div>
 
           <style>{`
-            /* responsive modal */
-            @media (max-width: 900px){
-              .__prints_modal_fix{
-                width: min(94vw, 760px) !important;
-                max-height: calc(100dvh - 28px) !important;
-                grid-template-columns: 1fr !important;
-                overflow: auto !important;
-              }
+  /* =========================================================
+     WHISPER Mobile Print Modal Fix
+     Prevent horizontal overflow + make print modal usable on phones
+     ========================================================= */
 
-              .__prints_media{
-                min-height: 46vh !important;
-                border-right: 0 !important;
-                border-bottom: 1px solid rgba(255,255,255,0.10) !important;
-              }
-            }
+  .__prints_modal_fix,
+  .__prints_modal_fix * {
+    box-sizing: border-box;
+  }
 
-            @media (max-width: 700px){
-              .__prints_modal_fix{
-                width: calc(100vw - 20px) !important;
-                max-height: calc(100dvh - 20px) !important;
-                border-radius: 12px !important;
-              }
+  @media (max-width: 900px) {
+    .__prints_modal_fix {
+      width: min(94vw, 760px) !important;
+      max-width: 94vw !important;
+      max-height: calc(100dvh - 28px) !important;
+      grid-template-columns: 1fr !important;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+    }
 
-              .__prints_media{
-                min-height: 36vh !important;
-              }
-            }
+    .__prints_modal_fix > * {
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    .__prints_media {
+      min-height: 42vh !important;
+      max-height: 48vh !important;
+      border-right: 0 !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.10) !important;
+      overflow: hidden !important;
+    }
+
+    .__prints_media img {
+      width: 100% !important;
+      height: 100% !important;
+      max-width: 100% !important;
+      object-fit: contain !important;
+    }
+
+    .__prints_modal_fix > div:nth-child(2) {
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      padding: 22px 18px 18px !important;
+      overflow-x: hidden !important;
+    }
+
+    .__prints_modal_fix h1,
+    .__prints_modal_fix h2,
+    .__prints_modal_fix h3 {
+      max-width: 100% !important;
+      overflow-wrap: anywhere !important;
+      word-break: normal !important;
+    }
+
+    .__prints_modal_fix h1 {
+      font-size: clamp(28px, 8vw, 42px) !important;
+      line-height: 1.02 !important;
+      letter-spacing: -0.035em !important;
+    }
+
+    .__prints_modal_fix p,
+    .__prints_modal_fix li,
+    .__prints_modal_fix span {
+      max-width: 100% !important;
+    }
+
+    .__prints_modal_fix button {
+      max-width: 100% !important;
+      touch-action: manipulation;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .__prints_modal_fix {
+      width: calc(100vw - 20px) !important;
+      max-width: calc(100vw - 20px) !important;
+      max-height: calc(100dvh - 20px) !important;
+      border-radius: 18px !important;
+      margin: 0 auto !important;
+    }
+
+    .__prints_media {
+      min-height: 34vh !important;
+      max-height: 38vh !important;
+    }
+
+    .__prints_modal_fix > div:nth-child(2) {
+      padding: 20px 16px 16px !important;
+    }
+
+    .__prints_modal_fix h1 {
+      font-size: clamp(24px, 7.5vw, 34px) !important;
+      line-height: 1.04 !important;
+    }
+
+    /* size selector / segmented controls */
+    .__prints_modal_fix [role="tablist"],
+    .__prints_modal_fix [aria-label*="size" i],
+    .__prints_modal_fix [aria-label*="Size" i] {
+      width: 100% !important;
+      max-width: 100% !important;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* bottom action row */
+    .__prints_modal_fix > div:nth-child(2) > div:last-child {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+      gap: 10px !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      overflow: visible !important;
+    }
+
+    .__prints_modal_fix > div:nth-child(2) > div:last-child button {
+      width: 100% !important;
+      min-width: 0 !important;
+      min-height: 50px !important;
+      padding: 12px 10px !important;
+      font-size: 10px !important;
+      line-height: 1.15 !important;
+      letter-spacing: 0.16em !important;
+      white-space: normal !important;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .__prints_media {
+      min-height: 30vh !important;
+      max-height: 34vh !important;
+    }
+
+    .__prints_modal_fix > div:nth-child(2) {
+      padding: 18px 14px 14px !important;
+    }
+
+    .__prints_modal_fix > div:nth-child(2) > div:last-child {
+      grid-template-columns: 1fr !important;
+    }
+
+    .__prints_modal_fix > div:nth-child(2) > div:last-child button {
+      min-height: 48px !important;
+    }
+  }
           `}</style>
         </div>
       ) : null}
