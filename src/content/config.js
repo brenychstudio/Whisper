@@ -13,7 +13,7 @@ export const site = {
   heroVideo: {
     mp4: "/media/hero.mp4",
     webm: "/media/hero.webm", // optional
-    poster: "/media/poster.jpg",
+    poster: "/whisper/forest/forest-stage.webp",
   },
 
   audio: {
@@ -185,7 +185,7 @@ seaSouls: {
       id: "sea-01",
       series: "sea",
       title: "Whisper of the Sea — 01",
-      image: "/sea/01.jpg",
+      image: "/sea/01.webp",
       edition: "Limited Edition of 30",
       paper: "Hahnemühle Photo Rag 308 gsm",
       sizes: ["30×40", "50×70", "70×100"],
@@ -196,7 +196,7 @@ seaSouls: {
       id: "forest-01",
       series: "forest",
       title: "Whisper of the Forest — 01",
-      image: "/forest/01.jpg",
+      image: "/forest/01.webp",
       edition: "Limited Edition of 30",
       paper: "Hahnemühle Photo Rag 308 gsm",
       sizes: ["30×40", "50×70", "70×100"],
@@ -210,7 +210,7 @@ seaSouls: {
       key: "sea",
       title: "Whisper of the Sea",
       shortLine: "Myth, tide, and a call to restore balance.",
-      cover: "/sea/cover.jpg",
+      cover: "/sea/cover.webp",
       notes: {
         statement:
           "A multimedia chapter where myth meets the ocean’s fragile reality — motion as memory, and a warning in the tide.",
@@ -226,7 +226,7 @@ seaSouls: {
         // If your drawer UI supports extra fields later, we can add: { label, href } objects here.
       },
       items: [
-        { type: "full", src: "/sea/01.jpg", srcSmall: "/sea/01_s.jpg", alt: "Sea 01" },
+        { type: "full", src: "/sea/01.webp", alt: "Sea 01" },
         {
           type: "text",
           eyebrow: "Whisper of the Sea",
@@ -234,19 +234,19 @@ seaSouls: {
           body: "A slow descent — where motion becomes a form of remembering.",
           align: "center",
         },
-        { type: "window", src: "/sea/02.jpg", srcSmall: "/sea/02_s.jpg", alt: "Sea 02" },
+        { type: "window", src: "/sea/02.webp", alt: "Sea 02" },
 
         {
           type: "video_stage",
           src: "/whisper/sea/sea-stage.mp4",
-          poster: "/whisper/sea/sea-stage.jpg",
+          poster: "/whisper/sea/sea-stage.webp",
           caption: "Sea — motion fragment",
           heightVh: 240,
           topOffset: 24,
           introVh: 18,
         },
 
-        { type: "full", src: "/sea/03.jpg", srcSmall: "/sea/03_s.jpg", alt: "Sea 03" },
+        { type: "full", src: "/sea/03.webp", alt: "Sea 03" },
         {
           type: "text",
           eyebrow: "AquaSouls",
@@ -254,16 +254,16 @@ seaSouls: {
           body: "Ancient guardians carry knowledge in their DNA — a whisper calling for balance before the tide returns.",
           align: "center",
         },
-        { type: "window", src: "/sea/04.jpg", srcSmall: "/sea/04_s.jpg", alt: "Sea 04" },
+        { type: "window", src: "/sea/04.webp", alt: "Sea 04" },
         {
           type: "diptych",
           items: [
-            { src: "/sea/05a.jpg", srcSmall: "/sea/05a_s.jpg", alt: "Sea 05a" },
-            { src: "/sea/05b.jpg", srcSmall: "/sea/05b_s.jpg", alt: "Sea 05b" },
+            { src: "/sea/05a.webp", alt: "Sea 05a" },
+            { src: "/sea/05b.webp", alt: "Sea 05b" },
           ],
         },
-        { type: "full", src: "/sea/06.jpg", srcSmall: "/sea/06_s.jpg", alt: "Sea 06" },
-        { type: "window", src: "/sea/07.jpg", srcSmall: "/sea/07_s.jpg", alt: "Sea 07" },
+        { type: "full", src: "/sea/06.webp", alt: "Sea 06" },
+        { type: "window", src: "/sea/07.webp", alt: "Sea 07" },
       ],
     },
 
@@ -271,7 +271,7 @@ seaSouls: {
       key: "forest",
       title: "Whisper of the Forest",
       shortLine: "Stillness, breath, and hidden witnessing.",
-      cover: "/forest/cover.jpg",
+      cover: "/forest/cover.webp",
       notes: {
         statement: "A suspended walk through stillness — where presence becomes audible.",
         context:
@@ -285,7 +285,7 @@ seaSouls: {
         links: [],
       },
       items: [
-        { type: "full", src: "/forest/01.jpg", srcSmall: "/forest/01_s.jpg", alt: "Forest 01" },
+        { type: "full", src: "/forest/01.webp", alt: "Forest 01" },
         {
           type: "text",
           eyebrow: "Silvans",
@@ -293,20 +293,20 @@ seaSouls: {
           body: "Ethereal forest spirits guide the energies of the woods — revealing the forgotten bond to those who listen.",
           align: "center",
         },
-        { type: "window", src: "/forest/02.jpg", srcSmall: "/forest/02_s.jpg", alt: "Forest 02" },
+        { type: "window", src: "/forest/02.webp", alt: "Forest 02" },
 
         {
           type: "video_stage",
           src: "/whisper/forest/forest-stage.mp4",
-          poster: "/whisper/forest/forest-stage.jpg",
+          poster: "/whisper/forest/forest-stage.webp",
           caption: "Forest — motion fragment",
           heightVh: 240,
           topOffset: 24,
           introVh: 22,
         },
 
-        { type: "full", src: "/forest/03.jpg", srcSmall: "/forest/03_s.jpg", alt: "Forest 03" },
-        { type: "window", src: "/forest/04.jpg", srcSmall: "/forest/04_s.jpg", alt: "Forest 04" },
+        { type: "full", src: "/forest/03.webp", alt: "Forest 03" },
+        { type: "window", src: "/forest/04.webp", alt: "Forest 04" },
         {
           type: "text",
           eyebrow: "Presence",
@@ -314,8 +314,8 @@ seaSouls: {
           body: "Not a narrative — an encounter where breath, distance, and silence become language.",
           align: "center",
         },
-        { type: "full", src: "/forest/05.jpg", srcSmall: "/forest/05_s.jpg", alt: "Forest 05" },
-        { type: "window", src: "/forest/06.jpg", srcSmall: "/forest/06_s.jpg", alt: "Forest 06" },
+        { type: "full", src: "/forest/05.webp", alt: "Forest 05" },
+        { type: "window", src: "/forest/06.webp", alt: "Forest 06" },
       ],
     },
   ],

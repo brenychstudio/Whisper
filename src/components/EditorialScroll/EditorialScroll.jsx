@@ -66,7 +66,7 @@ const codeFrom = (src, alt) => {
   const a = (alt || "").toString().match(/(\d+[a-z]?)/i)?.[1];
   if (a) return normalizeCode(a);
 
-  // 2) filename: /sea/05a.jpg -> 05a
+  // 2) filename: /sea/05a.webp -> 05a
   const f = (src || "").match(/\/(\d+[a-z]?)\.(jpe?g|png|webp)$/i)?.[1];
   if (f) return normalizeCode(f);
 

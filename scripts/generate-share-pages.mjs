@@ -50,7 +50,7 @@ function parseCode(input) {
 
 function codeFromPath(p) {
   const base = path.posix.basename(String(p || ""));
-  // "05a.jpg" -> "05a"
+  // "05a.webp" -> "05a"
   const stem = base.replace(/\.[a-z0-9]+$/i, "");
   return parseCode(stem);
 }

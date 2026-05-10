@@ -2,7 +2,7 @@
 import { site } from "../../../content/config.js";
 
 function inferPrintId(seriesKey, src) {
-  const m = String(src || "").match(/\/(\d+)([a-z])?\.jpg$/i);
+  const m = String(src || "").match(/\/(\d+)([a-z])?\.(?:jpe?g|png|webp)$/i);
   if (!m) return null;
   const n = String(m[1] || "").padStart(2, "0");
   const suf = (m[2] || "").toLowerCase();
