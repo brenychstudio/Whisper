@@ -11,6 +11,7 @@ export function createLocomotionShell({
   snapCooldownMs = 320,
   markerColor = 0x9bbcff,
   onCollectorSelect = null,
+  getDesktopSpeedScalar = null,
 }) {
   const controllerModelFactory = new XRControllerModelFactory();
   const teleportRay = new THREE.Raycaster();
@@ -161,7 +162,11 @@ export function createLocomotionShell({
   const updateDesktopMove = (dtSec) => {
     if (renderer.xr.isPresenting) return;
 
-    const speed = 1.45;
+    const speedScalar =
+      typeof getDesktopSpeedScalar === "function"
+        ? THREE.MathUtils.clamp(getDesktopSpeedScalar() ?? 1, 0.45, 1.25)
+        : 1;
+    const speed = 1.45 * speedScalar;
     let f = 0;
     let s = 0;
 

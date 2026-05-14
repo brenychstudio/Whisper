@@ -26,8 +26,9 @@ export function createInteractionShell({
   railInner.style.alignItems = "center";
   railInner.style.gap = "14px";
   railInner.style.opacity = "0";
-  railInner.style.transition = "opacity 220ms ease";
-  railInner.style.boxShadow = "0 10px 30px rgba(0,0,0,0.18)";
+  railInner.style.transform = "translateY(4px)";
+  railInner.style.transition = "opacity 240ms ease, transform 240ms ease, border-color 240ms ease";
+  railInner.style.boxShadow = "0 10px 30px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.035)";
 
   const railTitle = document.createElement("div");
   railTitle.className = "xr-interaction-rail-title";
@@ -56,7 +57,7 @@ export function createInteractionShell({
   railHint.style.color = "rgba(255,255,255,0.46)";
   railHint.style.whiteSpace = "nowrap";
   railHint.style.flexShrink = "0";
-  railHint.textContent = "C copy • O open";
+  railHint.textContent = "C COPY / O OPEN";
 
   const railMeter = document.createElement("div");
   railMeter.className = "xr-interaction-rail-meter";
@@ -131,11 +132,15 @@ export function createInteractionShell({
   const setRail = ({ pid = "", caption = "", visible = false, hintOpacity = 1 } = {}) => {
     if (visible) {
       railInner.style.opacity = "1";
-      railTitle.textContent = pid;
+      railInner.style.transform = "translateY(0)";
+      railInner.style.borderColor = "rgba(255,255,255,0.15)";
+      railTitle.textContent = String(pid || "").toUpperCase();
       railCaption.textContent = caption;
       railHint.style.opacity = String(hintOpacity);
     } else {
       railInner.style.opacity = "0";
+      railInner.style.transform = "translateY(4px)";
+      railInner.style.borderColor = "rgba(255,255,255,0.10)";
       railTitle.textContent = "";
       railCaption.textContent = "";
       railHint.style.opacity = "0.82";

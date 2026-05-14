@@ -9,6 +9,8 @@ import { createWhisperFinaleController } from "../../xr-experiences/whisper/fina
 import {
   makeDotTexture,
   makeRadialGradientTexture,
+  makeSilvanTexture,
+  makeSoulTexture,
   makeVerticalHazeTexture,
 } from "./helpers/xrTextureHelpers.js";
 import { createAmbientAudioSystem } from "./helpers/createAmbientAudioSystem.js";
@@ -94,12 +96,23 @@ let mobileCleanupFns = [];
     const seaSoulsEnabled = seaSoulsCfg?.enabled !== false; // default ON
     const seaSoulsCount = Math.max(0, Math.floor(seaSoulsCfg?.count ?? 64));
     const seaSoulsBigCount = Math.max(0, Math.floor(seaSoulsCfg?.bigCount ?? 18));
-    const seaSoulsBaseOpacity = seaSoulsCfg?.opacity ?? 0.11;
-    const seaSoulsTrailOpacity = seaSoulsCfg?.trailOpacity ?? 0.045;
-    const seaSoulsSize = seaSoulsCfg?.size ?? 0.085;
-    const seaSoulsBigSize = seaSoulsCfg?.bigSize ?? 0.15;
+    const seaSoulsBaseOpacity = seaSoulsCfg?.opacity ?? 0.15;
+    const seaSoulsTrailOpacity = seaSoulsCfg?.trailOpacity ?? 0.07;
+    const seaSoulsSize = seaSoulsCfg?.size ?? 0.105;
+    const seaSoulsBigSize = seaSoulsCfg?.bigSize ?? 0.19;
     const seaSoulsSpeed = seaSoulsCfg?.speed ?? 1.0;
     const seaSoulsProxRadius = seaSoulsCfg?.proximityRadius ?? 1.6;
+
+    // Forest-zone Silvans: low root/spore presences for the forest chapter.
+    const silvansCfg = options?.silvans || {};
+    const silvansEnabled = silvansCfg?.enabled !== false;
+    const silvansCount = Math.max(0, Math.floor(silvansCfg?.count ?? 38));
+    const silvansVeilCount = Math.max(0, Math.floor(silvansCfg?.veilCount ?? 8));
+    const silvansBaseOpacity = silvansCfg?.opacity ?? 0.092;
+    const silvansTrailOpacity = silvansCfg?.trailOpacity ?? 0.038;
+    const silvansSize = silvansCfg?.size ?? 0.125;
+    const silvansVeilSize = silvansCfg?.veilSize ?? 0.24;
+    const silvansSpeed = silvansCfg?.speed ?? 0.82;
 
     // Finale (installation act) — optional, Quest-safe.
     const finaleCfg = options?.finale || {};
@@ -724,6 +737,7 @@ gateCueHelper = createGateCue({
   getBaseDirIntensity: () => baseDirIntensity,
   getBaseHemiIntensity: () => baseHemiIntensity,
   getBaseFloorEmissive: () => baseFloorEmissive,
+  getViewerPosition: () => rig.position,
 });
 
 // ===== Zone mood (SEA <-> FOREST) =====
@@ -740,6 +754,9 @@ const _bgCol = new THREE.Color();
 const _keyCol = new THREE.Color();   // <-- ВАЖЛИВО: const, не "Const"
 const _hemiCol = new THREE.Color();
 const _dustCol = new THREE.Color();
+const _floorCol = new THREE.Color();
+const seaFloorEmissive = new THREE.Color(0x07101a);
+const forestFloorEmissive = new THREE.Color(0x07140a);
 
 let mood = 0; // 0=sea, 1=forest
 let moodTarget = 0;
@@ -763,6 +780,11 @@ const updateMood = (dtMs) => {
   _hemiCol.lerpColors(seaHemi, forestHemi, mood);
   hemi.color.copy(_hemiCol);
 
+  _floorCol.lerpColors(seaFloorEmissive, forestFloorEmissive, mood);
+  floorMat.emissive.copy(_floorCol);
+  floorMat.emissiveIntensity =
+    baseFloorEmissive + Math.sin(mood * Math.PI) * 0.018 + mood * 0.012;
+
   if (dustMat) {
     _dustCol.lerpColors(new THREE.Color(0xffffff), new THREE.Color(0xdfffee), mood);
     dustMat.color.copy(_dustCol);
@@ -778,7 +800,7 @@ const updateMood = (dtMs) => {
     const pathLen = zStart - zEnd;
     const midZ = (zStart + zEnd) * 0.5;
 
-    const hazeBaseOpacity = 0.055;
+    const hazeBaseOpacity = 0.085;
     let dustGeo = null;
     let dustMat = null;
     let dustVel = null;
@@ -814,6 +836,35 @@ const updateMood = (dtMs) => {
 
     let seaZMin = 0;
     let seaZMax = 0;
+
+    // ===== Forest-only Silvans (refs) =====
+    let silvanTex = null;
+    let silvanGeo = null;
+    let silvanTrailGeo = null;
+    let silvanVeilGeo = null;
+
+    let silvanMat = null;
+    let silvanTrailMat = null;
+    let silvanVeilMat = null;
+
+    let silvanPoints = null;
+    let silvanTrailPoints = null;
+    let silvanVeilPoints = null;
+
+    let silvanPos = null;
+    let silvanVel = null;
+    let silvanSeed = null;
+    let silvanTrailPos = null;
+
+    let silvanVeilPos = null;
+    let silvanVeilVel = null;
+    let silvanVeilSeed = null;
+
+    let SILVANS = 0;
+    let SILVAN_VEILS = 0;
+
+    let forestZMin = 0;
+    let forestZMax = 0;
 
 
     // ===== Environment: corridor OR open space =====
@@ -902,7 +953,7 @@ const updateMood = (dtMs) => {
 
       // ---- Sea-only ambient Aquasouls (drift across Sea zone) ----
       if (seaSoulsEnabled) {
-        seaSoulsTex = makeDotTexture();
+        seaSoulsTex = makeSoulTexture(128);
 
         SEA_SOULS = Math.max(0, Math.min(128, seaSoulsCount));
         SEA_SOULS_BIG = Math.max(0, Math.min(64, seaSoulsBigCount));
@@ -1013,6 +1064,113 @@ const updateMood = (dtMs) => {
         }
       }
 
+      // ---- Forest-only Silvans (low root/spore wisps for the forest chapter) ----
+      if (silvansEnabled) {
+        const firstForestIdx = works.findIndex((w) => w?.zoneId === "forest");
+        if (firstForestIdx >= 0) {
+          silvanTex = makeSilvanTexture(160);
+
+          SILVANS = Math.max(0, Math.min(128, silvansCount));
+          SILVAN_VEILS = Math.max(0, Math.min(48, silvansVeilCount));
+
+          forestZMax = -(firstForestIdx * spacing) + 1.1;
+          forestZMin = zEnd + 2.2;
+
+          silvanPos = new Float32Array(SILVANS * 3);
+          silvanVel = new Float32Array(SILVANS * 3);
+          silvanSeed = new Float32Array(SILVANS);
+          silvanTrailPos = new Float32Array(SILVANS * 3);
+
+          for (let i = 0; i < SILVANS; i++) {
+            const z = THREE.MathUtils.lerp(forestZMax, forestZMin, Math.random());
+            const idxF = (zStart - z) / Math.max(0.0001, spacing);
+            const cx2 = curveX(idxF);
+
+            silvanPos[i * 3 + 0] = cx2 + (Math.random() - 0.5) * 4.6;
+            silvanPos[i * 3 + 1] = 0.14 + Math.random() * 0.78;
+            silvanPos[i * 3 + 2] = z;
+
+            silvanVel[i * 3 + 0] = (Math.random() - 0.5) * 0.065;
+            silvanVel[i * 3 + 1] = (Math.random() - 0.5) * 0.025;
+            silvanVel[i * 3 + 2] = (Math.random() - 0.5) * 0.055;
+            silvanSeed[i] = Math.random() * Math.PI * 2;
+          }
+
+          silvanGeo = new THREE.BufferGeometry();
+          silvanGeo.setAttribute("position", new THREE.BufferAttribute(silvanPos, 3));
+
+          silvanTrailGeo = new THREE.BufferGeometry();
+          silvanTrailGeo.setAttribute("position", new THREE.BufferAttribute(silvanTrailPos, 3));
+
+          silvanMat = new THREE.PointsMaterial({
+            map: silvanTex || null,
+            transparent: true,
+            opacity: 0.0,
+            size: silvansSize,
+            depthWrite: false,
+            depthTest: false,
+            blending: THREE.AdditiveBlending,
+            color: 0xd7ffd8,
+          });
+
+          silvanTrailMat = new THREE.PointsMaterial({
+            map: silvanTex || null,
+            transparent: true,
+            opacity: 0.0,
+            size: silvansSize * 1.9,
+            depthWrite: false,
+            depthTest: false,
+            blending: THREE.AdditiveBlending,
+            color: 0xa8f2bf,
+          });
+
+          silvanTrailPoints = new THREE.Points(silvanTrailGeo, silvanTrailMat);
+          silvanTrailPoints.frustumCulled = false;
+          scene.add(silvanTrailPoints);
+
+          silvanPoints = new THREE.Points(silvanGeo, silvanMat);
+          silvanPoints.frustumCulled = false;
+          scene.add(silvanPoints);
+
+          if (SILVAN_VEILS > 0) {
+            silvanVeilPos = new Float32Array(SILVAN_VEILS * 3);
+            silvanVeilVel = new Float32Array(SILVAN_VEILS * 3);
+            silvanVeilSeed = new Float32Array(SILVAN_VEILS);
+
+            for (let i = 0; i < SILVAN_VEILS; i++) {
+              const z = THREE.MathUtils.lerp(forestZMax, forestZMin, Math.random());
+              const idxF = (zStart - z) / Math.max(0.0001, spacing);
+              const cx2 = curveX(idxF);
+              silvanVeilPos[i * 3 + 0] = cx2 + (Math.random() - 0.5) * 5.8;
+              silvanVeilPos[i * 3 + 1] = 0.18 + Math.random() * 1.05;
+              silvanVeilPos[i * 3 + 2] = z;
+              silvanVeilVel[i * 3 + 0] = (Math.random() - 0.5) * 0.035;
+              silvanVeilVel[i * 3 + 1] = (Math.random() - 0.5) * 0.018;
+              silvanVeilVel[i * 3 + 2] = (Math.random() - 0.5) * 0.03;
+              silvanVeilSeed[i] = Math.random() * Math.PI * 2;
+            }
+
+            silvanVeilGeo = new THREE.BufferGeometry();
+            silvanVeilGeo.setAttribute("position", new THREE.BufferAttribute(silvanVeilPos, 3));
+
+            silvanVeilMat = new THREE.PointsMaterial({
+              map: silvanTex || null,
+              transparent: true,
+              opacity: 0.0,
+              size: silvansVeilSize,
+              depthWrite: false,
+              depthTest: false,
+              blending: THREE.AdditiveBlending,
+              color: 0xe7ffd2,
+            });
+
+            silvanVeilPoints = new THREE.Points(silvanVeilGeo, silvanVeilMat);
+            silvanVeilPoints.frustumCulled = false;
+            scene.add(silvanVeilPoints);
+          }
+        }
+      }
+
     }
 
     // ===== Frames + Art planes =====
@@ -1038,10 +1196,15 @@ const updateMood = (dtMs) => {
 
     const artMeshes = [];
     const frameMeshes = [];
+    const auraMeshes = [];
+    const floorAuraMeshes = [];
+    const workWashLights = [];
     const anchorByPrintId = new Map();
     const indexByPrintId = new Map();
 const videoStageByPrintId = new Map();
 const stageGlowTex = makeRadialGradientTexture(512);
+const artAuraTex = makeRadialGradientTexture(512);
+const floorAuraTex = makeRadialGradientTexture(512);
 
 const stageGlowMatBase = new THREE.MeshBasicMaterial({
   map: stageGlowTex || null,
@@ -1051,6 +1214,23 @@ const stageGlowMatBase = new THREE.MeshBasicMaterial({
   depthTest: false,
   blending: THREE.AdditiveBlending,
   color: 0xaecbff,
+});
+const artAuraMatBase = new THREE.MeshBasicMaterial({
+  map: artAuraTex || null,
+  transparent: true,
+  opacity: 0.0,
+  depthWrite: false,
+  depthTest: false,
+  blending: THREE.AdditiveBlending,
+  color: 0xb8d4ff,
+});
+const floorAuraMatBase = new THREE.MeshBasicMaterial({
+  map: floorAuraTex || null,
+  transparent: true,
+  opacity: 0.0,
+  depthWrite: false,
+  blending: THREE.AdditiveBlending,
+  color: 0x9bbcff,
 });
         works.forEach((a, i) => {
       const left = i % 2 === 0;
@@ -1081,9 +1261,46 @@ const stageGlowMatBase = new THREE.MeshBasicMaterial({
       art.userData = { printId: a.printId, zoneId: a.zoneId, caption: a.caption || "" };
       group.add(art);
 
+      const aura = new THREE.Mesh(
+        new THREE.PlaneGeometry(1.86, 1.32),
+        artAuraMatBase.clone()
+      );
+      aura.material.color.set(a?.zoneId === "forest" ? 0xb7ffd9 : 0xb8d4ff);
+      aura.position.copy(art.position);
+      aura.position.z -= 0.018;
+      aura.rotation.copy(art.rotation);
+      aura.userData = { printId: a.printId, kind: "art_aura" };
+      aura.raycast = () => null;
+      group.add(aura);
+
+      const floorAura = new THREE.Mesh(
+        new THREE.PlaneGeometry(2.28, 1.34),
+        floorAuraMatBase.clone()
+      );
+      floorAura.material.color.set(a?.zoneId === "forest" ? 0x9cffbf : 0x9bbcff);
+      floorAura.rotation.x = -Math.PI / 2;
+      floorAura.rotation.z = isVideoStage ? 0 : frame.rotation.y * -0.35;
+      floorAura.position.set(frame.position.x, 0.013, frame.position.z + 0.22);
+      floorAura.userData = { printId: a.printId, kind: "floor_aura" };
+      floorAura.raycast = () => null;
+      scene.add(floorAura);
+
+      const washLight = new THREE.PointLight(
+        a?.zoneId === "forest" ? 0xd7ffd8 : 0xd8e7ff,
+        0,
+        4.8,
+        2.2
+      );
+      washLight.position.set(frame.position.x, 2.15, frame.position.z + 0.7);
+      washLight.userData = { printId: a.printId, kind: "work_wash_light" };
+      scene.add(washLight);
+
       // IMPORTANT: register ALL items (including video stage) for gaze + staging
       artMeshes.push(art);
       frameMeshes.push(frame);
+      auraMeshes.push(aura);
+      floorAuraMeshes.push(floorAura);
+      workWashLights.push(washLight);
       indexByPrintId.set(a.printId, i);
 
       // Anchor used for beacons/journey logic
@@ -1132,6 +1349,11 @@ const stageGlowMatBase = new THREE.MeshBasicMaterial({
           // glow follows portal size
           glow.scale.x = (desiredW / glowBaseW) * 1.06;
           glow.scale.y = (desiredH / glowBaseH) * 1.06;
+
+          aura.scale.x = desiredW / 1.86 * 1.34;
+          aura.scale.y = desiredH / 1.32 * 1.38;
+          floorAura.scale.x = Math.max(1.42, desiredW / 2.28 * 1.32);
+          floorAura.scale.y = Math.max(1.2, desiredH / 1.34 * 1.02);
         };
 
         // Video setup
@@ -1241,6 +1463,11 @@ const stageGlowMatBase = new THREE.MeshBasicMaterial({
             (desiredH / frameBaseH) * frameMargin,
             1
           );
+
+          aura.scale.x = desiredW / 1.86 * 1.32;
+          aura.scale.y = desiredH / 1.32 * 1.36;
+          floorAura.scale.x = Math.max(1.04, desiredW / 2.28 * 1.38);
+          floorAura.scale.y = Math.max(0.94, desiredH / 1.34 * 1.08);
         },
         undefined,
         () => {}
@@ -1494,6 +1721,8 @@ const stageGlowMatBase = new THREE.MeshBasicMaterial({
     const { setRail, setMeterProgress, setDesktopHint } = interactionShell;
     setDesktopHint(isMobileGyroCandidate ? "Mobile gyro preview" : "Desktop preview");
 
+    let desktopRouteAttention = 0;
+
     let collectorPanel = null;
 
     const sharePathForId = (pid) => {
@@ -1524,6 +1753,7 @@ const stageGlowMatBase = new THREE.MeshBasicMaterial({
       snapTurnDeg,
       snapCooldownMs,
       markerColor: 0xdfe7ea,
+      getDesktopSpeedScalar: () => 1 - desktopRouteAttention * 0.22,
       onCollectorSelect: ({ controller, interactRay, tempMatrix, tmpV, interactiveMeshes }) => {
         if (!collectorPanel?.isVisible?.()) return false;
 
@@ -1649,10 +1879,58 @@ mood = moodTarget;
 
     setBeaconToPrintId(currentBeatPrintId());
 
+    const cameraBaseLocal = new THREE.Vector3(0, 1.6, 0);
+    const cameraTargetLocal = new THREE.Vector3().copy(cameraBaseLocal);
+    let cinematicFov = camera.fov;
+
+    const updateCinematicCamera = (dtMs) => {
+      const desktopPreview =
+        !renderer.xr.isPresenting && !isMobileGyroCandidate && !controls?.isLocked;
+      const pid = currentBeatPrintId();
+      const at = pid ? anchorByPrintId.get(pid) : null;
+
+      let attentionTarget = 0;
+      let sideDrift = 0;
+      if (desktopPreview && at && journey.mode === "beats" && finaleMode === "off") {
+        const dx = at.x - rig.position.x;
+        const dz = at.z - rig.position.z;
+        const d = Math.sqrt(dx * dx + dz * dz);
+        attentionTarget = clamp01(1 - d / 3.65);
+        sideDrift = THREE.MathUtils.clamp(dx * 0.034, -0.055, 0.055);
+      }
+
+      const k = dampingFactor(dtMs, 320);
+      desktopRouteAttention += (attentionTarget - desktopRouteAttention) * k;
+
+      if (desktopPreview) {
+        cameraTargetLocal.set(
+          sideDrift,
+          cameraBaseLocal.y + desktopRouteAttention * 0.035,
+          -desktopRouteAttention * 0.035
+        );
+      } else {
+        cameraTargetLocal.copy(cameraBaseLocal);
+      }
+
+      camera.position.lerp(cameraTargetLocal, dampingFactor(dtMs, 260));
+
+      const targetFov = desktopPreview ? 55 - desktopRouteAttention * 1.7 : 55;
+      cinematicFov += (targetFov - cinematicFov) * dampingFactor(dtMs, 420);
+      if (Math.abs(camera.fov - cinematicFov) > 0.01) {
+        camera.fov = cinematicFov;
+        camera.updateProjectionMatrix();
+      }
+    };
+
 
     // ===== Sea-zone living Aquasouls (ambient, Sea-only) =====
     let seaSoulsMix = 0;
     let seaSoulsPulse = 0;
+    const seaUserPos = new THREE.Vector3();
+    const seaUserForward = new THREE.Vector3();
+    const seaUserRight = new THREE.Vector3();
+    const seaApproachPoint = new THREE.Vector3();
+    const seaUp = new THREE.Vector3(0, 1, 0);
 
     const updateSeaSouls = (dtMs, tNow) => {
       if (!seaSoulsEnabled) return;
@@ -1689,7 +1967,13 @@ mood = moodTarget;
       const opMul = seaSoulsMix * (0.72 + 0.28 * seaSoulsPulse);
       seaSoulsMat.opacity = seaSoulsBaseOpacity * opMul;
       seaSoulsTrailMat.opacity = seaSoulsTrailOpacity * opMul;
-      if (seaSoulsBigMat) seaSoulsBigMat.opacity = (seaSoulsBaseOpacity * 0.55) * opMul;
+      const seaBreath = 1 + seaSoulsPulse * 0.16 + Math.sin(tNow * 0.0011) * 0.025;
+      seaSoulsMat.size = seaSoulsSize * seaBreath;
+      seaSoulsTrailMat.size = seaSoulsSize * 1.85 * (1 + seaSoulsPulse * 0.22);
+      if (seaSoulsBigMat) {
+        seaSoulsBigMat.opacity = (seaSoulsBaseOpacity * 0.55) * opMul;
+        seaSoulsBigMat.size = seaSoulsBigSize * (1 + seaSoulsPulse * 0.18);
+      }
 
       const visible = opMul > 0.004;
       seaSoulsPoints.visible = visible;
@@ -1699,6 +1983,12 @@ mood = moodTarget;
       if (!visible) return;
 
       const speed = seaSoulsSpeed;
+      camera.getWorldPosition(seaUserPos);
+      camera.getWorldDirection(seaUserForward);
+      seaUserRight.crossVectors(seaUserForward, seaUp).normalize();
+      if (seaUserRight.lengthSq() < 0.001) seaUserRight.set(1, 0, 0);
+      seaApproachPoint.copy(seaUserPos).addScaledVector(seaUserForward, 1.85);
+      seaApproachPoint.y = Math.max(1.15, Math.min(2.35, seaUserPos.y + 0.04));
 
       // update main layer
       if (seaSoulsPos && seaSoulsVel && seaSoulsSeed) {
@@ -1713,20 +2003,57 @@ mood = moodTarget;
 
           const seed = seaSoulsSeed[i];
 
-          // centerline attraction (content-driven curve)
+          // Volumetric drift: keep souls related to the route, but never pinned to one line.
           const idxF = (zStart - z) / Math.max(0.0001, spacing);
           const tx = curveX(idxF);
-          vx += (tx - x) * (0.18 * dt) * speed;
-          vy += (1.75 - y) * (0.10 * dt) * speed;
+          const phase = tNow * 0.00042 + seed;
+          const laneRadius = 1.25 + 1.9 * (0.5 + 0.5 * Math.sin(seed * 1.91));
+          const verticalHome = 1.05 + 2.75 * (0.5 + 0.5 * Math.sin(seed * 2.43));
+          const targetX =
+            tx +
+            Math.sin(phase * (0.8 + 0.25 * Math.sin(seed))) * laneRadius +
+            Math.cos(phase * 1.7 + seed * 0.61) * 0.56;
+          const targetY =
+            verticalHome +
+            Math.sin(phase * 1.3 + seed * 1.7) * 0.42 +
+            Math.cos(phase * 0.72 + seed * 2.2) * 0.22;
+          const targetZ =
+            z +
+            Math.cos(phase * 1.1 + seed * 0.8) * 0.55;
 
-          // subtle helical drift along Z (premium "alive" feel)
-          const swirl = 0.20 * Math.sin(tNow * 0.0014 + seed);
-          vz += (tx - x) * (0.28 * dt) * swirl * speed;
+          vx += (targetX - x) * (0.105 * dt) * speed;
+          vy += (targetY - y) * (0.075 * dt) * speed;
+          vz += (targetZ - z) * (0.052 * dt) * speed;
 
-          // calm noise (deterministic)
-          vx += 0.06 * Math.sin(tNow * 0.0011 + seed * 3.1) * dt * speed;
-          vy += 0.03 * Math.sin(tNow * 0.0013 + seed * 2.2) * dt * speed;
-          vz += 0.06 * Math.cos(tNow * 0.0010 + seed * 2.7) * dt * speed;
+          // calm individual motion
+          vx += 0.095 * Math.sin(tNow * 0.0011 + seed * 3.1) * dt * speed;
+          vy += 0.055 * Math.sin(tNow * 0.0013 + seed * 2.2) * dt * speed;
+          vz += 0.085 * Math.cos(tNow * 0.0010 + seed * 2.7) * dt * speed;
+
+          const curiosity = 0.5 + 0.5 * Math.sin(seed * 5.37);
+          const approachWave = clamp01((Math.sin(tNow * 0.00046 + seed * 2.8) - 0.08) / 0.92);
+          const approach = seaSoulsMix * approachWave * (curiosity > 0.38 ? 1 : 0.18);
+          if (approach > 0.001) {
+            const side = Math.sin(seed * 2.17) * (0.38 + curiosity * 0.78);
+            const hover = Math.cos(seed * 1.71) * 0.42;
+            const ax = seaApproachPoint.x + seaUserRight.x * side;
+            const ay = seaApproachPoint.y + hover;
+            const az = seaApproachPoint.z + seaUserRight.z * side;
+            vx += (ax - x) * (0.22 * dt) * approach * speed;
+            vy += (ay - y) * (0.16 * dt) * approach * speed;
+            vz += (az - z) * (0.22 * dt) * approach * speed;
+          }
+
+          const ux = x - seaUserPos.x;
+          const uy = y - seaUserPos.y;
+          const uz = z - seaUserPos.z;
+          const userD = Math.sqrt(ux * ux + uy * uy + uz * uz);
+          if (userD < 0.72 && userD > 0.001) {
+            const repel = (0.72 - userD) / 0.72;
+            vx += (ux / userD) * repel * 0.34 * dt * speed;
+            vy += (uy / userD) * repel * 0.22 * dt * speed;
+            vz += (uz / userD) * repel * 0.34 * dt * speed;
+          }
 
           // proximity response: gently lean toward user
           if (seaSoulsPulse > 0.01) {
@@ -1749,10 +2076,10 @@ mood = moodTarget;
           if (z > seaZMax) z = seaZMin;
 
           // soft bounds
-          if (x < -8) x = -8;
-          if (x > 8) x = 8;
-          if (y < 0.85) y = 0.85;
-          if (y > 4.1) y = 4.1;
+          if (x < -7.2) x = -7.2;
+          if (x > 7.2) x = 7.2;
+          if (y < 0.7) y = 0.7;
+          if (y > 4.45) y = 4.45;
 
           seaSoulsPos[i * 3 + 0] = x;
           seaSoulsPos[i * 3 + 1] = y;
@@ -1788,10 +2115,51 @@ mood = moodTarget;
 
           const idxF = (zStart - z) / Math.max(0.0001, spacing);
           const tx = curveX(idxF);
+          const phase = tNow * 0.00032 + seed;
+          const laneRadius = 1.9 + 2.4 * (0.5 + 0.5 * Math.sin(seed * 1.37));
+          const verticalHome = 1.15 + 2.5 * (0.5 + 0.5 * Math.sin(seed * 2.05));
+          const targetX =
+            tx +
+            Math.sin(phase * 0.78 + seed * 0.4) * laneRadius +
+            Math.cos(phase * 1.22 + seed) * 0.72;
+          const targetY =
+            verticalHome +
+            Math.sin(phase * 1.1 + seed * 1.8) * 0.5;
+          const targetZ =
+            z +
+            Math.cos(phase * 0.9 + seed * 2.3) * 0.72;
 
-          vx += (tx - x) * (0.10 * dt) * speed;
-          vy += (1.9 - y) * (0.06 * dt) * speed;
-          vz += 0.05 * Math.cos(tNow * 0.0009 + seed * 2.3) * dt * speed;
+          vx += (targetX - x) * (0.072 * dt) * speed;
+          vy += (targetY - y) * (0.052 * dt) * speed;
+          vz += (targetZ - z) * (0.04 * dt) * speed;
+          vx += 0.045 * Math.sin(tNow * 0.0008 + seed * 1.7) * dt * speed;
+          vy += 0.03 * Math.sin(tNow * 0.00095 + seed * 2.1) * dt * speed;
+          vz += 0.07 * Math.cos(tNow * 0.0009 + seed * 2.3) * dt * speed;
+
+          const curiosity = 0.5 + 0.5 * Math.sin(seed * 4.71);
+          const approachWave = clamp01((Math.sin(tNow * 0.00036 + seed * 2.4) + 0.12) / 1.12);
+          const approach = seaSoulsMix * approachWave * (0.22 + curiosity * 0.56);
+          if (approach > 0.001) {
+            const side = Math.sin(seed * 1.63) * (0.72 + curiosity * 1.05);
+            const hover = Math.cos(seed * 2.09) * 0.58;
+            const ax = seaApproachPoint.x + seaUserRight.x * side + seaUserForward.x * 0.34;
+            const ay = seaApproachPoint.y + hover;
+            const az = seaApproachPoint.z + seaUserRight.z * side + seaUserForward.z * 0.34;
+            vx += (ax - x) * (0.12 * dt) * approach * speed;
+            vy += (ay - y) * (0.09 * dt) * approach * speed;
+            vz += (az - z) * (0.12 * dt) * approach * speed;
+          }
+
+          const ux = x - seaUserPos.x;
+          const uy = y - seaUserPos.y;
+          const uz = z - seaUserPos.z;
+          const userD = Math.sqrt(ux * ux + uy * uy + uz * uz);
+          if (userD < 0.95 && userD > 0.001) {
+            const repel = (0.95 - userD) / 0.95;
+            vx += (ux / userD) * repel * 0.22 * dt * speed;
+            vy += (uy / userD) * repel * 0.16 * dt * speed;
+            vz += (uz / userD) * repel * 0.22 * dt * speed;
+          }
 
           if (seaSoulsPulse > 0.01) {
             vx += (rig.position.x - x) * (0.03 * dt) * seaSoulsPulse * speed;
@@ -1810,6 +2178,11 @@ mood = moodTarget;
           if (z < seaZMin) z = seaZMax;
           if (z > seaZMax) z = seaZMin;
 
+          if (x < -7.8) x = -7.8;
+          if (x > 7.8) x = 7.8;
+          if (y < 0.75) y = 0.75;
+          if (y > 4.55) y = 4.55;
+
           seaSoulsBigPos[i * 3 + 0] = x;
           seaSoulsBigPos[i * 3 + 1] = y;
           seaSoulsBigPos[i * 3 + 2] = z;
@@ -1820,6 +2193,200 @@ mood = moodTarget;
         }
 
         seaSoulsBigGeo?.attributes?.position && (seaSoulsBigGeo.attributes.position.needsUpdate = true);
+      }
+    };
+
+    // ===== Forest-zone Silvans =====
+    let silvansMix = 0;
+    let silvansPulse = 0;
+
+    const updateSilvans = (dtMs, tNow) => {
+      if (!silvansEnabled) return;
+      if (!silvanPoints || !silvanMat || !silvanTrailMat) return;
+
+      const dt = dtMs / 1000;
+      const forestTarget = finaleMode === "off" && mood > 0.42 ? 1 : 0;
+      const kMix = 1 - Math.pow(0.5, dtMs / 420);
+      silvansMix += (forestTarget - silvansMix) * kMix;
+
+      let pulseTarget = 0;
+      try {
+        const pid = currentBeatPrintId?.() ? currentBeatPrintId() : null;
+        const beat = currentBeat?.() || null;
+        if (pid && beat?.zoneId === "forest") {
+          const at = anchorByPrintId.get(pid);
+          if (at) {
+            const dx = rig.position.x - at.x;
+            const dz = rig.position.z - at.z;
+            const d = Math.sqrt(dx * dx + dz * dz);
+            if (d < 2.2) pulseTarget = 1 - d / 2.2;
+          }
+        }
+      } catch {}
+
+      const kPulse = 1 - Math.pow(0.5, dtMs / 220);
+      silvansPulse += (pulseTarget - silvansPulse) * kPulse;
+
+      const opMul = silvansMix * (0.78 + 0.22 * silvansPulse);
+      silvanMat.opacity = silvansBaseOpacity * opMul;
+      silvanTrailMat.opacity = silvansTrailOpacity * opMul;
+      const silvanBreath = 1 + silvansPulse * 0.18 + Math.sin(tNow * 0.0014) * 0.018;
+      silvanMat.size = silvansSize * silvanBreath;
+      silvanTrailMat.size = silvansSize * 1.9 * (1 + silvansPulse * 0.16);
+      if (silvanVeilMat) {
+        silvanVeilMat.opacity = silvansBaseOpacity * 0.32 * opMul;
+        silvanVeilMat.size = silvansVeilSize * (1 + silvansPulse * 0.12);
+      }
+
+      const visible = opMul > 0.004;
+      silvanPoints.visible = visible;
+      silvanTrailPoints.visible = visible;
+      if (silvanVeilPoints) silvanVeilPoints.visible = visible;
+      if (!visible) return;
+
+      const speed = silvansSpeed;
+      camera.getWorldPosition(seaUserPos);
+      camera.getWorldDirection(seaUserForward);
+      seaUserRight.crossVectors(seaUserForward, seaUp).normalize();
+      if (seaUserRight.lengthSq() < 0.001) seaUserRight.set(1, 0, 0);
+      seaApproachPoint.copy(seaUserPos).addScaledVector(seaUserForward, 2.15);
+      seaApproachPoint.y = 0.52;
+
+      if (silvanPos && silvanVel && silvanSeed) {
+        for (let i = 0; i < SILVANS; i++) {
+          let x = silvanPos[i * 3 + 0];
+          let y = silvanPos[i * 3 + 1];
+          let z = silvanPos[i * 3 + 2];
+
+          let vx = silvanVel[i * 3 + 0];
+          let vy = silvanVel[i * 3 + 1];
+          let vz = silvanVel[i * 3 + 2];
+
+          const seed = silvanSeed[i];
+          const idxF = (zStart - z) / Math.max(0.0001, spacing);
+          const tx = curveX(idxF);
+          const phase = tNow * 0.00034 + seed;
+          const rootSide = 1.05 + 1.85 * (0.5 + 0.5 * Math.sin(seed * 1.31));
+          const targetX =
+            tx +
+            Math.sin(phase * 0.76 + seed * 0.7) * rootSide +
+            Math.sin(y * 1.4 + seed) * 0.22;
+          const targetY =
+            0.18 +
+            0.72 * (0.5 + 0.5 * Math.sin(phase * 0.74 + seed * 1.9)) +
+            silvansPulse * 0.18;
+          const targetZ =
+            z +
+            Math.cos(phase * 0.82 + seed * 1.4) * 0.46;
+
+          vx += (targetX - x) * (0.07 * dt) * speed;
+          vy += (targetY - y) * (0.075 * dt) * speed;
+          vz += (targetZ - z) * (0.04 * dt) * speed;
+
+          vx += 0.035 * Math.sin(tNow * 0.0009 + seed * 2.7) * dt * speed;
+          vy += 0.028 * Math.sin(tNow * 0.0011 + seed * 2.1) * dt * speed;
+          vz += 0.035 * Math.cos(tNow * 0.00082 + seed * 2.9) * dt * speed;
+
+          const curiosity = 0.5 + 0.5 * Math.sin(seed * 4.93);
+          const approachWave = clamp01((Math.sin(tNow * 0.00029 + seed * 2.2) + 0.18) / 1.18);
+          const approach = silvansMix * approachWave * (curiosity > 0.48 ? 0.24 : 0.06);
+          if (approach > 0.001) {
+            const side = Math.sin(seed * 1.97) * (0.68 + curiosity * 0.82);
+            const hover = Math.cos(seed * 2.43) * 0.18;
+            const ax = seaApproachPoint.x + seaUserRight.x * side;
+            const ay = seaApproachPoint.y + hover;
+            const az = seaApproachPoint.z + seaUserRight.z * side;
+            vx += (ax - x) * (0.11 * dt) * approach * speed;
+            vy += (ay - y) * (0.08 * dt) * approach * speed;
+            vz += (az - z) * (0.11 * dt) * approach * speed;
+          }
+
+          const ux = x - seaUserPos.x;
+          const uy = y - seaUserPos.y;
+          const uz = z - seaUserPos.z;
+          const userD = Math.sqrt(ux * ux + uy * uy + uz * uz);
+          if (userD < 0.82 && userD > 0.001) {
+            const repel = (0.82 - userD) / 0.82;
+            vx += (ux / userD) * repel * 0.24 * dt * speed;
+            vy += (uy / userD) * repel * 0.2 * dt * speed;
+            vz += (uz / userD) * repel * 0.24 * dt * speed;
+          }
+
+          const damp = 0.989;
+          vx *= damp;
+          vy *= damp;
+          vz *= damp;
+
+          x += vx * dt;
+          y += vy * dt;
+          z += vz * dt;
+
+          if (z < forestZMin) z = forestZMax;
+          if (z > forestZMax) z = forestZMin;
+          if (x < -7.4) x = -7.4;
+          if (x > 7.4) x = 7.4;
+          if (y < 0.12) y = 0.12;
+          if (y > 1.22) y = 1.22;
+
+          silvanPos[i * 3 + 0] = x;
+          silvanPos[i * 3 + 1] = y;
+          silvanPos[i * 3 + 2] = z;
+
+          silvanVel[i * 3 + 0] = vx;
+          silvanVel[i * 3 + 1] = vy;
+          silvanVel[i * 3 + 2] = vz;
+
+          const lag = 1.2;
+          silvanTrailPos[i * 3 + 0] = x - vx * lag;
+          silvanTrailPos[i * 3 + 1] = y - vy * lag;
+          silvanTrailPos[i * 3 + 2] = z - vz * lag;
+        }
+
+        silvanGeo?.attributes?.position && (silvanGeo.attributes.position.needsUpdate = true);
+        silvanTrailGeo?.attributes?.position && (silvanTrailGeo.attributes.position.needsUpdate = true);
+      }
+
+      if (SILVAN_VEILS > 0 && silvanVeilPos && silvanVeilVel && silvanVeilSeed) {
+        for (let i = 0; i < SILVAN_VEILS; i++) {
+          let x = silvanVeilPos[i * 3 + 0];
+          let y = silvanVeilPos[i * 3 + 1];
+          let z = silvanVeilPos[i * 3 + 2];
+          let vx = silvanVeilVel[i * 3 + 0];
+          let vy = silvanVeilVel[i * 3 + 1];
+          let vz = silvanVeilVel[i * 3 + 2];
+          const seed = silvanVeilSeed[i];
+          const idxF = (zStart - z) / Math.max(0.0001, spacing);
+          const tx = curveX(idxF);
+          const phase = tNow * 0.00022 + seed;
+
+          vx += (tx + Math.sin(phase + seed) * 3.2 - x) * (0.036 * dt) * speed;
+          vy += (0.36 + Math.sin(phase * 1.3 + seed) * 0.42 - y) * (0.04 * dt) * speed;
+          vz += Math.cos(phase * 1.1 + seed) * 0.025 * dt * speed;
+
+          vx *= 0.992;
+          vy *= 0.993;
+          vz *= 0.992;
+
+          x += vx * dt;
+          y += vy * dt;
+          z += vz * dt;
+
+          if (z < forestZMin) z = forestZMax;
+          if (z > forestZMax) z = forestZMin;
+          if (x < -8.2) x = -8.2;
+          if (x > 8.2) x = 8.2;
+          if (y < 0.12) y = 0.12;
+          if (y > 1.35) y = 1.35;
+
+          silvanVeilPos[i * 3 + 0] = x;
+          silvanVeilPos[i * 3 + 1] = y;
+          silvanVeilPos[i * 3 + 2] = z;
+          silvanVeilVel[i * 3 + 0] = vx;
+          silvanVeilVel[i * 3 + 1] = vy;
+          silvanVeilVel[i * 3 + 2] = vz;
+        }
+
+        silvanVeilGeo?.attributes?.position && (silvanVeilGeo.attributes.position.needsUpdate = true);
       }
     };
 
@@ -2159,7 +2726,7 @@ mood = moodTarget;
       if (cur?.zoneId && next?.zoneId && cur.zoneId !== next.zoneId && gate && gatePos) {
         journey.mode = "gate";
         journey.gateToIndex = nextIdx;
-        gate.visible = true;
+        gateCueHelper?.show?.();
         gateCueHelper?.trigger();
         setBeaconToGate();
         pendingMoodTarget = next?.zoneId || null;
@@ -2294,8 +2861,7 @@ mood = moodTarget;
             setMoodTargetByZone(pendingMoodTarget);
             pendingMoodTarget = null;
           }
-          const gate = gateCueHelper?.getGate?.();
-          if (gate) gate.visible = false;
+          gateCueHelper?.hide?.();
 
           gateCueHelper?.trigger();
           setBeaconToPrintId(currentBeatPrintId());
@@ -2401,6 +2967,7 @@ const updateCinematicStaging = (dtMs) => {
     focusedPrintId && indexByPrintId.has(focusedPrintId)
       ? indexByPrintId.get(focusedPrintId)
       : -1;
+  const curatorialFocus = clamp01(desktopRouteAttention);
 
   // preview тільки для НАСТУПНОЇ роботи, якщо на неї дивляться
   const previewIdx =
@@ -2429,6 +2996,10 @@ const updateCinematicStaging = (dtMs) => {
     }
 
     targetA = Math.max(0, Math.min(1, targetA));
+    const isActive = i === focusIdx;
+    const isNext = i === focusIdx + 1;
+    const isFocused = i === focusedIdx;
+    const focusLift = isActive ? curatorialFocus : isNext ? curatorialFocus * 0.35 : 0;
 
     const art = artMeshes[i];
     if (art) {
@@ -2437,6 +3008,13 @@ const updateCinematicStaging = (dtMs) => {
         m.transparent = true;
         const cur = typeof m.opacity === "number" ? m.opacity : targetA;
         m.opacity = cur + (targetA - cur) * k;
+        if (m.color?.setRGB) {
+          const colorLevel = Math.min(
+            1,
+            0.68 + targetA * 0.30 + (isActive ? 0.055 : 0) + focusLift * 0.045
+          );
+          m.color.setRGB(colorLevel, colorLevel, colorLevel);
+        }
         const visible = m.opacity > 0.02 || targetA > 0.02;
         art.visible = visible;
       } else {
@@ -2447,7 +3025,7 @@ const updateCinematicStaging = (dtMs) => {
     const frame = frameMeshes[i];
     if (frame) {
       const m = frame.material;
-      const targetF = baseFrameOpacity * (0.35 + 0.65 * targetA);
+      const targetF = baseFrameOpacity * (0.30 + 0.70 * targetA + focusLift * 0.22);
       if (m) {
         m.transparent = true;
         const cur = typeof m.opacity === "number" ? m.opacity : targetF;
@@ -2457,6 +3035,42 @@ const updateCinematicStaging = (dtMs) => {
       } else {
         frame.visible = targetA > 0.02;
       }
+    }
+
+    const aura = auraMeshes[i];
+    if (aura?.material) {
+      const auraTarget =
+        targetA > 0.02
+          ? 0.04 + targetA * 0.13 + (isActive ? 0.11 : 0) + (isFocused ? 0.08 : 0) + focusLift * 0.08
+          : 0;
+      aura.material.opacity += (auraTarget - aura.material.opacity) * k;
+      aura.visible = aura.material.opacity > 0.004 || auraTarget > 0.004;
+      const auraPulse = 1 + focusLift * 0.055 + Math.sin(performance.now() * 0.0009 + i) * 0.006;
+      aura.scale.set(auraPulse, auraPulse, 1);
+    }
+
+    const floorAura = floorAuraMeshes[i];
+    if (floorAura?.material) {
+      const floorTarget =
+        targetA > 0.02
+          ? 0.035 + targetA * 0.115 + (isActive ? 0.105 : 0) + (isNext ? 0.035 : 0) + focusLift * 0.055
+          : 0;
+      floorAura.material.opacity += (floorTarget - floorAura.material.opacity) * k;
+      floorAura.visible = floorAura.material.opacity > 0.004 || floorTarget > 0.004;
+    }
+
+    const washLight = workWashLights[i];
+    if (washLight) {
+      const zoneMood = works[i]?.zoneId === "forest" ? mood : 1 - mood;
+      const washTarget =
+        targetA > 0.02
+          ? (isActive ? 0.54 : isNext ? 0.24 : 0.075) *
+            targetA *
+            (0.72 + zoneMood * 0.28) *
+            (1 + focusLift * 0.18)
+          : 0;
+      washLight.intensity += (washTarget - washLight.intensity) * k;
+      washLight.visible = washLight.intensity > 0.004 || washTarget > 0.004;
     }
   }
 };
@@ -2537,7 +3151,7 @@ const updateCinematicStaging = (dtMs) => {
 
       dustGeo.attributes.position.needsUpdate = true;
       const breath = clamp01(gatePulse / Math.max(0.001, gatePulsePeak));
-      dustMat.opacity = (0.085 + 0.018 * Math.sin(tNow * 0.0012)) * (1 + breath * 0.18);
+      dustMat.opacity = (0.12 + 0.028 * Math.sin(tNow * 0.0012)) * (1 + breath * 0.22);
     };
 
     // ===== Share keybinds (desktop) =====
@@ -2604,7 +3218,6 @@ renderer.setAnimationLoop((t) => {
 
   updateGaze(dtMs);
   updateGate();
-  gateCueHelper?.update(dtMs);
   updateVideoStages(dtMs, t);
   updateTransitionPulse(dtMs);
 
@@ -2623,13 +3236,17 @@ renderer.setAnimationLoop((t) => {
       console.error("updateMood error:", e);
     }
   }
+  environmentShell?.update?.(dtMs, t, mood);
+  gateCueHelper?.update(dtMs);
   ambientAudio?.update();
 
   updateSeaSouls(dtMs, t);
+  updateSilvans(dtMs, t);
 
   updateFinale(dtMs, t);
 
   updateProximityGlow();
+  updateCinematicCamera(dtMs);
 
   updateEffects(dtMs, t);
   updateDust(dtMs, t);
@@ -2722,6 +3339,25 @@ renderer.setAnimationLoop((t) => {
         environmentShell?.dispose();
       } catch {}
 
+      try {
+        stageGlowTex?.dispose?.();
+        artAuraTex?.dispose?.();
+        floorAuraTex?.dispose?.();
+        auraMeshes.forEach((mesh) => {
+          mesh.geometry?.dispose?.();
+          mesh.material?.dispose?.();
+        });
+        floorAuraMeshes.forEach((mesh) => {
+          mesh.geometry?.dispose?.();
+          mesh.material?.dispose?.();
+          scene.remove(mesh);
+        });
+        workWashLights.forEach((light) => {
+          scene.remove(light);
+          light.dispose?.();
+        });
+      } catch {}
+
       // Sea-only ambient Aquasouls cleanup
       try {
         seaSoulsTex?.dispose?.();
@@ -2732,6 +3368,18 @@ renderer.setAnimationLoop((t) => {
         seaSoulsMat?.dispose?.();
         seaSoulsTrailMat?.dispose?.();
         seaSoulsBigMat?.dispose?.();
+      } catch {}
+
+      // Forest-only Silvans cleanup
+      try {
+        silvanTex?.dispose?.();
+        silvanGeo?.dispose?.();
+        silvanTrailGeo?.dispose?.();
+        silvanVeilGeo?.dispose?.();
+
+        silvanMat?.dispose?.();
+        silvanTrailMat?.dispose?.();
+        silvanVeilMat?.dispose?.();
       } catch {}
 
       // corridor cleanup (if used)
