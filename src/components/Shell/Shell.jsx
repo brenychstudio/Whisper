@@ -4,10 +4,12 @@ import { site } from "../../content/config.js";
 import NotesDrawer from "../NotesDrawer/NotesDrawer.jsx";
 import AudioToggle from "../AudioToggle/AudioToggle.jsx";
 import AmbientField from "../AmbientField/AmbientField.jsx";
+import WebGLAmbientField from "../WebGLAmbientField/WebGLAmbientField.jsx";
 import styles from "./Shell.module.css";
 
 const PAGE_TRANSITION_FALLBACK_MS = 450;
 const NAV_CUT_FALLBACK_MS = 200;
+const USE_WEBGL_AMBIENT = true;
 
 function readVarMs(name, fallback) {
   if (typeof window === "undefined") return fallback;
@@ -63,14 +65,40 @@ export default function Shell({ children }) {
   const isFullBleed =
     location.pathname === "/" || location.pathname === "/series" || location.pathname === "/xr";
 
-  const ambientOn = uiPath === "/credits" || uiPath === "/contact" || uiPath === "/prints";
-  const ambientPreset = uiPath === "/contact" ? "forest" : "sea";
-  const ambientIntensity = uiPath === "/prints" ? 1.05 : 1.35;
-
   const activeSeriesKey = useMemo(() => {
     const m = uiPath.match(/^\/series\/([^/]+)/);
     return m?.[1] ?? null;
   }, [uiPath]);
+
+  const ambientOn =
+    uiPath === "/credits" ||
+    uiPath === "/contact" ||
+    uiPath === "/prints" ||
+    uiPath === "/immersive" ||
+    Boolean(activeSeriesKey);
+  const ambientPreset = activeSeriesKey === "forest" || uiPath === "/contact" ? "forest" : "sea";
+  const ambientIsReading = uiPath === "/credits" || uiPath === "/contact";
+  const ambientIsExperience = uiPath === "/immersive";
+  const ambientIntensity = activeSeriesKey
+    ? 0.9
+    : ambientIsReading
+      ? 0.98
+      : uiPath === "/prints"
+        ? 0.82
+        : ambientIsExperience
+          ? 0.9
+          : 1;
+  const ambientIsPrints = uiPath === "/prints";
+  const ambientIsSeries = Boolean(activeSeriesKey);
+  const ambientSoulScale = ambientIsPrints
+    ? 0.34
+    : ambientIsExperience
+      ? 0.84
+      : ambientIsReading
+        ? 0.72
+        : ambientIsSeries
+          ? 0.68
+          : 1;
 
   const notesPayload = useMemo(() => {
     const s = site.series.find((x) => x.key === activeSeriesKey);
@@ -171,7 +199,27 @@ export default function Shell({ children }) {
 
       {!isXRKiosk ? (
         <div className={styles.ambientWrap} aria-hidden="true">
-          <AmbientField enabled={ambientOn} preset={ambientPreset} intensity={ambientIntensity} />
+          {USE_WEBGL_AMBIENT ? (
+            <WebGLAmbientField
+              enabled={ambientOn}
+              preset={ambientPreset}
+              intensity={ambientIsPrints ? 0.82 : ambientIntensity}
+              maxDpr={ambientIsPrints ? 0.7 : ambientIsSeries ? 0.92 : ambientIsExperience ? 1 : 1.1}
+              maxRenderPixels={ambientIsPrints ? 320000 : ambientIsReading ? 720000 : ambientIsSeries ? 640000 : ambientIsExperience ? 840000 : 920000}
+              fps={ambientIsPrints ? 24 : ambientIsSeries ? 30 : ambientIsExperience ? 36 : 36}
+              soulScale={ambientSoulScale}
+              readability={ambientIsReading ? 0.78 : ambientIsPrints ? 0.35 : ambientIsExperience ? 0.22 : 0}
+            />
+          ) : (
+            <AmbientField
+              enabled={ambientOn}
+              preset={ambientPreset}
+              intensity={ambientIntensity}
+              maxDpr={ambientIsPrints ? 0.75 : 1.35}
+              fps={ambientIsPrints ? 24 : 60}
+              particleScale={ambientIsPrints ? 0.25 : 1}
+            />
+          )}
         </div>
       ) : null}
 

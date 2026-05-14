@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 // Runtime dependency kept in features/ for stability. Canonical scene config ownership stays with the module contract.
 import { buildPrintSceneConfig } from "../buildPrintSceneConfig.js";
 
@@ -103,29 +104,89 @@ function resolveMaterialPreset(options = {}) {
   };
 }
 
+function createProceduralTexture({ kind = "fine", color = "#808080", size = 256 } = {}) {
+  if (typeof document === "undefined") return null;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+
+  const base = new THREE.Color(color);
+  const image = ctx.createImageData(size, size);
+
+  for (let y = 0; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      const i = (y * size + x) * 4;
+      const wave = kind === "oak"
+        ? Math.sin((x * 0.11) + Math.sin(y * 0.035) * 2.1) * 0.5 + 0.5
+        : Math.sin((x + y) * 0.045) * 0.5 + 0.5;
+      const speckle = Math.random();
+      const grain = kind === "oak"
+        ? 0.78 + wave * 0.18 + speckle * 0.04
+        : 0.88 + wave * 0.045 + speckle * 0.07;
+
+      image.data[i] = Math.min(255, Math.max(0, base.r * 255 * grain));
+      image.data[i + 1] = Math.min(255, Math.max(0, base.g * 255 * grain));
+      image.data[i + 2] = Math.min(255, Math.max(0, base.b * 255 * grain));
+      image.data[i + 3] = 255;
+    }
+  }
+
+  ctx.putImageData(image, 0, 0);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(kind === "oak" ? 2.4 : 3.2, kind === "oak" ? 0.7 : 2.8);
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.needsUpdate = true;
+  return texture;
+}
+
+function createFrameMaterial({
+  color,
+  roughness,
+  metalness,
+  clearcoat,
+  clearcoatRoughness,
+  grainTexture,
+  emissiveIntensity = 0.012,
+}) {
+  const frameColor = new THREE.Color(color);
+  return new THREE.MeshPhysicalMaterial({
+    color,
+    map: grainTexture || null,
+    roughness,
+    metalness,
+    clearcoat,
+    clearcoatRoughness,
+    emissive: frameColor,
+    emissiveIntensity,
+    sheen: 0.12,
+    sheenRoughness: 0.78,
+  });
+}
+
 function createFrameRailMesh({
   length,
   thickness,
   depth,
   orientation = "horizontal",
-  faceMaterial,
-  sideMaterial,
+  material,
+  bevelRadius = 0.002,
 }) {
   const width = orientation === "horizontal" ? length : thickness;
   const height = orientation === "horizontal" ? thickness : length;
 
-  const geometry = new THREE.BoxGeometry(width, height, depth);
+  const radius = Math.min(bevelRadius, width * 0.08, height * 0.32, depth * 0.32);
+  const geometry = new RoundedBoxGeometry(width, height, depth, 4, radius);
+  geometry.computeVertexNormals();
 
-  const materials = [
-    sideMaterial, // +X
-    sideMaterial, // -X
-    sideMaterial, // +Y
-    sideMaterial, // -Y
-    faceMaterial, // +Z front
-    sideMaterial, // -Z back
-  ];
-
-  const mesh = new THREE.Mesh(geometry, materials);
+  const mesh = new THREE.Mesh(geometry, material);
   return { mesh, geometry };
 }
 
@@ -172,49 +233,48 @@ export async function buildExportSceneGroup(payload, options = {}) {
   if (config.frame.enabled) {
     const frameFaceColor = config.frame.faceColor || config.frame.color || "#26282d";
     const frameSideColor = config.frame.sideColor || frameFaceColor;
-    const faceMaterial = track(
+    const frameGrainTexture = track(
       disposables,
-      new THREE.MeshPhysicalMaterial({
+      createProceduralTexture({
+        kind: config.frame.grainHint === "subtle" ? "oak" : "fine",
         color: frameFaceColor,
-        roughness: config.frame.roughness ?? materialPreset.frame.roughness,
-        metalness: config.frame.metalness ?? materialPreset.frame.metalness,
-        clearcoat: config.frame.clearcoat ?? materialPreset.frame.clearcoat,
-        clearcoatRoughness:
-          config.frame.clearcoatRoughness ?? materialPreset.frame.clearcoatRoughness,
       }),
     );
-
-    const sideMaterial = track(
+    const frameMaterial = track(
       disposables,
-      new THREE.MeshPhysicalMaterial({
-        color: frameSideColor,
-        roughness:
-          config.frame.sideRoughness ??
-          config.frame.roughness ??
-          materialPreset.frame.roughness,
-        metalness:
-          config.frame.sideMetalness ??
-          config.frame.metalness ??
-          materialPreset.frame.metalness,
-        clearcoat: Math.max(
-          (config.frame.clearcoat ?? materialPreset.frame.clearcoat) * 0.45,
-          0,
-        ),
+      createFrameMaterial({
+        color: frameFaceColor,
+        roughness: Math.min(config.frame.roughness ?? materialPreset.frame.roughness, 0.92),
+        metalness: config.frame.metalness ?? materialPreset.frame.metalness,
+        clearcoat: Math.max(config.frame.clearcoat ?? materialPreset.frame.clearcoat, 0.08),
         clearcoatRoughness:
           config.frame.clearcoatRoughness ?? materialPreset.frame.clearcoatRoughness,
+        grainTexture: frameGrainTexture,
+      }),
+    );
+    const frameSideMaterial = track(
+      disposables,
+      createFrameMaterial({
+        color: frameSideColor,
+        roughness: config.frame.sideRoughness ?? materialPreset.frame.roughness,
+        metalness: config.frame.sideMetalness ?? materialPreset.frame.metalness,
+        clearcoat: Math.max((config.frame.clearcoat ?? materialPreset.frame.clearcoat) * 0.35, 0.02),
+        clearcoatRoughness: config.frame.clearcoatRoughness ?? materialPreset.frame.clearcoatRoughness,
+        grainTexture: frameGrainTexture,
       }),
     );
 
     const profileWidth = Math.max(config.frame.profileWidthMm * scale, 0.012);
     const railDepth = Math.max(config.frame.profileDepthMm * scale, 0.01);
+    const railBevel = Math.max((config.frame.geometry?.outerBevelMm || 1.8) * scale, 0.0014);
 
     const horizontalRail = createFrameRailMesh({
       length: frameOuterWidth,
       thickness: profileWidth,
       depth: railDepth,
       orientation: "horizontal",
-      faceMaterial,
-      sideMaterial,
+      material: frameMaterial,
+      bevelRadius: railBevel,
     });
 
     const verticalRail = createFrameRailMesh({
@@ -222,8 +282,8 @@ export async function buildExportSceneGroup(payload, options = {}) {
       thickness: profileWidth,
       depth: railDepth,
       orientation: "vertical",
-      faceMaterial,
-      sideMaterial,
+      material: frameMaterial,
+      bevelRadius: railBevel,
     });
 
     track(disposables, horizontalRail.geometry);
@@ -243,11 +303,51 @@ export async function buildExportSceneGroup(payload, options = {}) {
     left.position.set(-halfOuterW + halfProfileW, 0, 0);
     right.position.set(halfOuterW - halfProfileW, 0, 0);
 
+    const sideInset = Math.max(profileWidth * 0.18, 0.004);
+    const sideDepth = Math.max(railDepth * 0.78, 0.008);
+    const sideBevel = Math.max(railBevel * 0.55, 0.0009);
+
+    const sideHorizontalRail = createFrameRailMesh({
+      length: frameOuterWidth - sideInset * 2,
+      thickness: Math.max(profileWidth * 0.34, 0.006),
+      depth: sideDepth,
+      orientation: "horizontal",
+      material: frameSideMaterial,
+      bevelRadius: sideBevel,
+    });
+
+    const sideVerticalRail = createFrameRailMesh({
+      length: frameOuterHeight - sideInset * 2,
+      thickness: Math.max(profileWidth * 0.34, 0.006),
+      depth: sideDepth,
+      orientation: "vertical",
+      material: frameSideMaterial,
+      bevelRadius: sideBevel,
+    });
+
+    track(disposables, sideHorizontalRail.geometry);
+    track(disposables, sideVerticalRail.geometry);
+
+    const sideTop = sideHorizontalRail.mesh;
+    const sideBottom = sideHorizontalRail.mesh.clone();
+    const sideLeft = sideVerticalRail.mesh;
+    const sideRight = sideVerticalRail.mesh.clone();
+    const sideZ = -railDepth * 0.13;
+
+    sideTop.position.set(0, halfOuterH - profileWidth * 0.19, sideZ);
+    sideBottom.position.set(0, -halfOuterH + profileWidth * 0.19, sideZ);
+    sideLeft.position.set(-halfOuterW + profileWidth * 0.19, 0, sideZ);
+    sideRight.position.set(halfOuterW - profileWidth * 0.19, 0, sideZ);
+
     top.userData.part = "frame";
     bottom.userData.part = "frame";
     left.userData.part = "frame";
     right.userData.part = "frame";
-    group.add(top, bottom, left, right);
+    sideTop.userData.part = "frame";
+    sideBottom.userData.part = "frame";
+    sideLeft.userData.part = "frame";
+    sideRight.userData.part = "frame";
+    group.add(sideTop, sideBottom, sideLeft, sideRight, top, bottom, left, right);
 
     const lipInset = Math.max(
       (config.frame.innerLipInsetMm ?? 5.2) * scale,
@@ -263,11 +363,10 @@ export async function buildExportSceneGroup(payload, options = {}) {
     );
 
     const lipFaceColor = mixHexColors(frameFaceColor, frameSideColor, 0.72);
-    const lipSideColor = mixHexColors(frameSideColor, "#0b0f14", 0.32);
 
     const lipFaceMaterial = track(
       disposables,
-      new THREE.MeshPhysicalMaterial({
+      createFrameMaterial({
         color: lipFaceColor,
         roughness: Math.min(
           (config.frame.roughness ?? materialPreset.frame.roughness) + 0.04,
@@ -280,29 +379,7 @@ export async function buildExportSceneGroup(payload, options = {}) {
         ),
         clearcoatRoughness:
           config.frame.clearcoatRoughness ?? materialPreset.frame.clearcoatRoughness,
-      }),
-    );
-
-    const lipSideMaterial = track(
-      disposables,
-      new THREE.MeshPhysicalMaterial({
-        color: lipSideColor,
-        roughness: Math.min(
-          (config.frame.sideRoughness ??
-            config.frame.roughness ??
-            materialPreset.frame.roughness) + 0.05,
-          1,
-        ),
-        metalness:
-          config.frame.sideMetalness ??
-          config.frame.metalness ??
-          materialPreset.frame.metalness,
-        clearcoat: Math.max(
-          (config.frame.clearcoat ?? materialPreset.frame.clearcoat) * 0.2,
-          0,
-        ),
-        clearcoatRoughness:
-          config.frame.clearcoatRoughness ?? materialPreset.frame.clearcoatRoughness,
+        grainTexture: frameGrainTexture,
       }),
     );
 
@@ -311,8 +388,8 @@ export async function buildExportSceneGroup(payload, options = {}) {
       thickness: lipWidth,
       depth: lipDepth,
       orientation: "horizontal",
-      faceMaterial: lipFaceMaterial,
-      sideMaterial: lipSideMaterial,
+      material: lipFaceMaterial,
+      bevelRadius: Math.max(railBevel * 0.45, 0.0007),
     });
 
     const lipVerticalRail = createFrameRailMesh({
@@ -320,8 +397,8 @@ export async function buildExportSceneGroup(payload, options = {}) {
       thickness: lipWidth,
       depth: lipDepth,
       orientation: "vertical",
-      faceMaterial: lipFaceMaterial,
-      sideMaterial: lipSideMaterial,
+      material: lipFaceMaterial,
+      bevelRadius: Math.max(railBevel * 0.45, 0.0007),
     });
 
     track(disposables, lipHorizontalRail.geometry);
@@ -358,6 +435,8 @@ export async function buildExportSceneGroup(payload, options = {}) {
         color: config.mat.color,
         roughness: materialPreset.mat.roughness,
         metalness: materialPreset.mat.metalness,
+        emissive: new THREE.Color(config.mat.color),
+        emissiveIntensity: 0.012,
       }),
     );
 
@@ -367,22 +446,52 @@ export async function buildExportSceneGroup(payload, options = {}) {
     group.add(matBoard);
   }
 
-  const paperGeometry = track(
-    disposables,
-    new THREE.BoxGeometry(paperWidth, paperHeight, paperDepth),
-  );
-  const paperMaterial = track(
-    disposables,
-    new THREE.MeshStandardMaterial({
-      color: config.paper.color,
-      roughness: materialPreset.paper.roughness,
-      metalness: materialPreset.paper.metalness,
-    }),
-  );
-  const paperSheet = new THREE.Mesh(paperGeometry, paperMaterial);
-  paperSheet.position.set(0, 0, frameDepth / 2 + matDepth / 2 + paperDepth / 2);
-  paperSheet.userData.part = "paper";
-  group.add(paperSheet);
+  if (!config.mat.enabled) {
+    const paperShadowGeometry = track(
+      disposables,
+      new THREE.PlaneGeometry(paperWidth + 0.032, paperHeight + 0.032),
+    );
+    const paperShadowMaterial = track(
+      disposables,
+      new THREE.MeshBasicMaterial({
+        color: "#000000",
+        transparent: true,
+        opacity: config.frame.enabled ? 0.18 : 0.12,
+        depthWrite: false,
+      }),
+    );
+    const paperShadow = new THREE.Mesh(paperShadowGeometry, paperShadowMaterial);
+    paperShadow.position.set(
+      0.002,
+      -0.004,
+      frameDepth / 2 + matDepth / 2 + 0.00045,
+    );
+    paperShadow.userData.part = "paper-shadow";
+    group.add(paperShadow);
+
+    const paperGeometry = track(
+      disposables,
+      new RoundedBoxGeometry(paperWidth, paperHeight, paperDepth, 3, 0.0012),
+    );
+    const paperMaterial = track(
+      disposables,
+      new THREE.MeshStandardMaterial({
+        color: config.paper.color,
+        roughness: materialPreset.paper.roughness,
+        metalness: materialPreset.paper.metalness,
+        emissive: new THREE.Color(config.paper.color),
+        emissiveIntensity: 0.01,
+      }),
+    );
+    const paperSheet = new THREE.Mesh(paperGeometry, paperMaterial);
+    paperSheet.position.set(0, 0, frameDepth / 2 + matDepth / 2 + paperDepth / 2);
+    paperSheet.userData.part = "paper";
+    group.add(paperSheet);
+  }
+
+  const artworkZ = config.mat.enabled
+    ? frameDepth / 2 + 0.001
+    : frameDepth / 2 + matDepth / 2 + paperDepth + 0.0008;
 
   const artGeometry = track(disposables, new THREE.PlaneGeometry(imageWidth, imageHeight));
   const artMaterial = track(
@@ -404,10 +513,34 @@ export async function buildExportSceneGroup(payload, options = {}) {
   artMesh.position.set(
     imageOffsetX,
     imageOffsetY,
-    frameDepth / 2 + matDepth / 2 + paperDepth + 0.0008,
+    artworkZ,
   );
   artMesh.userData.part = "artwork";
   group.add(artMesh);
+
+  const glassGeometry = track(disposables, new THREE.PlaneGeometry(imageWidth, imageHeight));
+  const glassMaterial = track(
+    disposables,
+    new THREE.MeshPhysicalMaterial({
+      color: "#ffffff",
+      transparent: true,
+      opacity: 0.055,
+      roughness: 0.08,
+      metalness: 0,
+      clearcoat: 1,
+      clearcoatRoughness: 0.18,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+    }),
+  );
+  const glassMesh = new THREE.Mesh(glassGeometry, glassMaterial);
+  glassMesh.position.set(
+    imageOffsetX,
+    imageOffsetY,
+    artworkZ + 0.00045,
+  );
+  glassMesh.userData.part = "glass";
+  group.add(glassMesh);
 
   group.userData.printPreview = {
     productId: payload?.productId || "",

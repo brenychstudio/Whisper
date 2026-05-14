@@ -6,6 +6,7 @@ export function getInteractivePreviewPreset(config) {
   const longerSideMm = Math.max(outerWidthMm, outerHeightMm);
   const baseDistance =
     longerSideMm >= 1000 ? 3.15 : longerSideMm >= 800 ? 2.8 : 2.45;
+  const previewDistance = baseDistance * 0.78;
   const frameLighting = {
     black: {
       ambient: 0.78,
@@ -42,12 +43,12 @@ export function getInteractivePreviewPreset(config) {
 
   return {
     camera: {
-      fov: 26,
+      fov: 23,
       near: 0.1,
       far: 24,
-      distance: baseDistance - 0.08,
-      minDistance: Math.max(baseDistance - 0.8, 1.55),
-      maxDistance: baseDistance + 1.15,
+      distance: previewDistance,
+      minDistance: Math.max(previewDistance - 0.46, 1.35),
+      maxDistance: previewDistance + 1.2,
       focusYOffset: isLandscape ? 0.01 : 0.02,
     },
     object: {

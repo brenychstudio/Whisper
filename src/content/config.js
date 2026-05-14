@@ -24,6 +24,7 @@ export const site = {
   nav: [
     { label: "Series", to: "/series" },
     { label: "Prints", to: "/prints" },
+    { label: "Immersive", to: "/immersive" },
     { label: "Notes", to: "__notes__" }, // special (opens drawer)
     { label: "Credits", to: "/credits" },
     { label: "Contact", to: "/contact" },
@@ -43,7 +44,7 @@ export const site = {
   xr: {
     enabled: true,
     experienceId: "whisper",
-    experiencePath: "/experience",
+    experiencePath: "/immersive",
     kioskPath: "/xr",
     questHint: "Works on Meta Quest Browser",
 
@@ -71,9 +72,12 @@ export const site = {
 
     mobileGyro: {
       enabled: true,
-      moveSpeed: 1.18,
-      strafeSpeed: 0.92,
+      moveSpeed: 0.84,
+      strafeSpeed: 0.66,
       hudFade: 0.92,
+      smoothHalfLifeMs: 120,
+      moveHalfLifeMs: 140,
+      maxPitchDeg: 68,
     },
 
     hands: {

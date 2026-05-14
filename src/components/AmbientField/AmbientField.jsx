@@ -9,6 +9,9 @@ export default function AmbientField({
   enabled = false,
   preset = "forest", // "forest" | "sea"
   intensity = 1.25,  // 1.0..2.0
+  maxDpr = 1.35,
+  fps = 60,
+  particleScale = 1,
 }) {
   const canvasRef = useRef(null);
   const rafRef = useRef(0);
@@ -30,7 +33,8 @@ export default function AmbientField({
     const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
-    const DPR = Math.min(window.devicePixelRatio || 1, 2);
+    const DPR = Math.min(window.devicePixelRatio || 1, maxDpr);
+    const frameInterval = fps > 0 && fps < 60 ? 1000 / fps : 0;
     const pointer = pointerRef.current;
 
     let W = 0;
@@ -49,7 +53,7 @@ export default function AmbientField({
 
     function spawnParticles() {
       const base = preset === "sea" ? 110 : 90;
-      const count = Math.floor(base * intensity);
+      const count = Math.floor(base * intensity * particleScale);
 
       const arr = [];
       const slow = preset === "sea" ? 0.22 : 0.18;
@@ -122,6 +126,11 @@ export default function AmbientField({
     }
 
     function draw(now) {
+      if (frameInterval && now - last < frameInterval) {
+        rafRef.current = requestAnimationFrame(draw);
+        return;
+      }
+
       const dt = clamp((now - last) / 16.666, 0.5, 2.0);
       last = now;
 
@@ -252,7 +261,7 @@ export default function AmbientField({
       window.removeEventListener("mousedown", onDown);
       window.removeEventListener("mouseleave", onLeave);
     };
-  }, [enabled, preset, intensity]);
+  }, [enabled, preset, intensity, maxDpr, fps, particleScale]);
 
   if (!enabled) return null;
 

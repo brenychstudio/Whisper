@@ -5,11 +5,11 @@ import { getFrameMaterialPreset } from "../../modules/print-ar/getFrameMaterialP
 function resolveMatColor(style) {
   const value = String(style || "").toLowerCase();
 
-  if (value.includes("warm")) return "#ece6dc";
-  if (value.includes("white")) return "#f1ede6";
+  if (value.includes("warm")) return "#f7f5ef";
+  if (value.includes("white")) return "#f8f8f4";
   if (value.includes("black")) return "#232428";
 
-  return "#ece6dc";
+  return "#f7f5ef";
 }
 
 export function buildPrintSceneConfig(payload) {
@@ -57,7 +57,7 @@ export function buildPrintSceneConfig(payload) {
       widthMm: paperWidthMm,
       heightMm: paperHeightMm,
       depthMm: 1.2,
-      color: "#f3efe8",
+      color: "#f8f7f2",
       border: {
         topMm: borderTopMm,
         rightMm: borderRightMm,

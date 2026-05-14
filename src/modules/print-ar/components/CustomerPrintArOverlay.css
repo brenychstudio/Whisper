@@ -988,3 +988,529 @@
     border-radius: 16px;
   }
 }
+
+/* =========================================================
+   WHISPER customer preview modal - final responsive shell
+   Keeps the 3D preview above print details and inside viewport.
+   ========================================================= */
+
+.customer-print-ar-backdrop {
+  z-index: 2400 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 16px !important;
+  overflow: hidden !important;
+  overscroll-behavior: contain !important;
+  background: rgba(0, 0, 0, 0.68) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+.customer-print-ar-panel {
+  width: min(1080px, calc(100vw - 32px)) !important;
+  max-height: calc(100svh - 32px) !important;
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+  overflow: hidden !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  background: rgba(10, 10, 14, 0.94) !important;
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.58) !important;
+}
+
+.customer-print-ar-header {
+  margin: 0 !important;
+  padding: 18px 22px 14px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.customer-print-ar-eyebrow {
+  margin: 0 0 8px !important;
+  font-size: 10px !important;
+  letter-spacing: 0.18em !important;
+  color: rgba(255, 255, 255, 0.48) !important;
+}
+
+.customer-print-ar-header h2 {
+  margin: 0 !important;
+  max-width: 18ch !important;
+  font-size: clamp(26px, 3vw, 40px) !important;
+  line-height: 1.08 !important;
+  letter-spacing: 0 !important;
+  font-family: var(--font-serif), ui-serif, Georgia, "Times New Roman", serif !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+}
+
+.customer-print-ar-header > .customer-print-ar-btn,
+.customer-print-ar-header .customer-print-ar-btn--ghost {
+  flex: 0 0 auto !important;
+  min-height: 46px !important;
+  padding: 0 20px !important;
+  border-radius: 999px !important;
+}
+
+.customer-print-ar-body {
+  min-height: 0 !important;
+  overflow: hidden !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.35fr) minmax(300px, 360px) !important;
+  gap: 0 !important;
+  padding: 0 !important;
+}
+
+.customer-print-ar-canvas {
+  min-height: min(68svh, 640px) !important;
+  max-height: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.10) !important;
+  background: rgba(0, 0, 0, 0.35) !important;
+}
+
+.customer-print-ar-summary {
+  align-self: stretch !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: rgba(10, 10, 14, 0.58) !important;
+  padding: 18px !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+.customer-print-ar-summary-list {
+  margin-top: 14px !important;
+}
+
+.customer-print-ar-summary-row {
+  padding: 10px 0 !important;
+}
+
+.customer-print-ar-state,
+.customer-print-ar-note {
+  display: none !important;
+}
+
+.customer-print-ar-actions {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr 1fr !important;
+  gap: 10px !important;
+  margin-top: 14px !important;
+}
+
+.customer-print-ar-btn,
+.customer-print-ar-action,
+.customer-print-ar-cta {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 48px !important;
+  border-radius: 8px !important;
+  padding: 0 14px !important;
+  font-size: 11px !important;
+  line-height: 1 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  text-align: center !important;
+}
+
+.customer-print-ar-cta-short {
+  display: none;
+}
+
+.customer-print-ar-btn > span,
+.customer-print-ar-action > span,
+.customer-print-ar-cta > span {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+}
+
+.customer-print-ar-frame-pill {
+  min-height: 36px !important;
+  border-radius: 999px !important;
+  font-size: 11px !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+.interactive-print-preview-3d,
+.print-ar-preview3d {
+  min-height: 100% !important;
+  height: 100% !important;
+}
+
+@media (max-width: 980px) {
+  .customer-print-ar-body {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: minmax(260px, 48svh) minmax(0, 1fr) !important;
+  }
+
+  .customer-print-ar-canvas {
+    min-height: 0 !important;
+    border-right: 0 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.10) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .customer-print-ar-backdrop {
+    padding: calc(8px + env(safe-area-inset-top, 0px)) 8px calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  .customer-print-ar-panel {
+    width: calc(100vw - 16px) !important;
+    max-height: calc(100svh - 16px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
+    border-radius: 18px 18px 12px 12px !important;
+  }
+
+  .customer-print-ar-header {
+    padding: 18px 22px 14px !important;
+    align-items: center !important;
+  }
+
+  .customer-print-ar-header h2 {
+    max-width: 14ch !important;
+    font-size: clamp(26px, 7vw, 32px) !important;
+    line-height: 1.04 !important;
+    letter-spacing: 0 !important;
+  }
+
+  .customer-print-ar-header > .customer-print-ar-btn,
+  .customer-print-ar-header .customer-print-ar-btn--ghost {
+    min-height: 48px !important;
+    padding: 0 20px !important;
+    font-size: 12px !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+  }
+
+  .customer-print-ar-body {
+    grid-template-rows: minmax(220px, 34svh) minmax(0, 1fr) !important;
+  }
+
+  .customer-print-ar-summary {
+    padding: 14px !important;
+  }
+
+  .customer-print-ar-summary-list,
+  .customer-print-ar-state,
+  .customer-print-ar-note {
+    display: none !important;
+  }
+
+  .customer-print-ar-frame-picker {
+    margin: 0 !important;
+  }
+
+  .customer-print-ar-frame-picker__label {
+    margin-bottom: 10px !important;
+  }
+
+  .customer-print-ar-actions {
+    position: sticky !important;
+    bottom: 0 !important;
+    margin-top: 14px !important;
+    padding-top: 12px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  }
+
+  .customer-print-ar-btn--full {
+    margin-top: 10px !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .customer-print-ar-body {
+    grid-template-rows: minmax(200px, 30svh) minmax(0, 1fr) !important;
+  }
+
+  .customer-print-ar-summary {
+    padding: 12px !important;
+  }
+
+  .customer-print-ar-actions {
+    grid-template-columns: 1fr 1fr 1fr !important;
+    gap: 8px !important;
+  }
+
+  .customer-print-ar-btn--ar {
+    grid-column: auto !important;
+  }
+
+  .customer-print-ar-btn,
+  .customer-print-ar-action,
+  .customer-print-ar-cta {
+    min-height: 42px !important;
+    padding: 0 10px !important;
+    font-size: 9.5px !important;
+    letter-spacing: 0.12em !important;
+  }
+
+  .customer-print-ar-cta-full {
+    display: none;
+  }
+
+  .customer-print-ar-cta-short {
+    display: inline;
+  }
+}
+
+/* =========================================================
+   WHISPER AR preview final pass
+   Compact title, larger artwork presence, closer site styling.
+   ========================================================= */
+
+.customer-print-ar-backdrop {
+  background:
+    radial-gradient(900px 620px at 50% 42%, rgba(120, 160, 190, 0.055), transparent 62%),
+    rgba(0, 0, 0, 0.72) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+.customer-print-ar-panel {
+  width: min(1180px, calc(100vw - 36px)) !important;
+  max-height: min(88svh, 860px) !important;
+  border-radius: 12px !important;
+  border-color: rgba(255, 255, 255, 0.135) !important;
+  background:
+    linear-gradient(180deg, rgba(9, 10, 15, 0.97), rgba(7, 8, 12, 0.965)) !important;
+  box-shadow:
+    0 34px 120px rgba(0, 0, 0, 0.64),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035) !important;
+}
+
+.customer-print-ar-header {
+  min-height: 116px !important;
+  padding: 24px 24px 18px !important;
+  align-items: center !important;
+  gap: 24px !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.018), rgba(255, 255, 255, 0)) !important;
+}
+
+.customer-print-ar-header > div:first-child {
+  min-width: 0 !important;
+}
+
+.customer-print-ar-eyebrow {
+  margin-bottom: 9px !important;
+  letter-spacing: 0.22em !important;
+  color: rgba(255, 255, 255, 0.44) !important;
+}
+
+.customer-print-ar-header h2,
+.customer-print-ar-titleLine {
+  max-width: none !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: flex-start !important;
+  gap: 0.34em !important;
+  font-family: var(--font-serif), ui-serif, Georgia, "Times New Roman", serif !important;
+  font-size: clamp(30px, 3.25vw, 46px) !important;
+  line-height: 0.95 !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  color: rgba(255, 255, 255, 0.94) !important;
+  text-wrap: balance;
+}
+
+.customer-print-ar-titleLine__name {
+  min-width: 0;
+}
+
+.customer-print-ar-titleLine__code {
+  flex: 0 0 auto;
+  margin-top: 0.02em;
+  font-size: 0.84em;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.86);
+  white-space: nowrap;
+}
+
+.customer-print-ar-header > .customer-print-ar-btn,
+.customer-print-ar-header .customer-print-ar-btn--ghost {
+  min-width: 94px !important;
+  min-height: 44px !important;
+  padding: 0 18px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.018) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: rgba(255, 255, 255, 0.68) !important;
+}
+
+.customer-print-ar-body {
+  grid-template-columns: minmax(0, 1.58fr) minmax(300px, 350px) !important;
+}
+
+.customer-print-ar-canvas {
+  min-height: min(68svh, 650px) !important;
+  background:
+    radial-gradient(760px 460px at 50% 45%, rgba(155, 185, 220, 0.105), transparent 62%),
+    linear-gradient(180deg, rgba(13, 18, 25, 0.86), rgba(4, 6, 10, 0.96)) !important;
+}
+
+.print-ar-preview3d,
+.interactive-print-preview-3d {
+  border-radius: 0 !important;
+  min-height: 100% !important;
+}
+
+.customer-print-ar-summary {
+  padding: 18px 18px 16px !important;
+  background:
+    linear-gradient(180deg, rgba(11, 12, 17, 0.72), rgba(8, 9, 13, 0.86)) !important;
+}
+
+.customer-print-ar-frame-picker {
+  margin-bottom: 18px !important;
+}
+
+.customer-print-ar-frame-picker__label {
+  margin-bottom: 11px !important;
+  letter-spacing: 0.22em !important;
+  color: rgba(255, 255, 255, 0.48) !important;
+}
+
+.customer-print-ar-frame-picker__controls {
+  gap: 7px !important;
+}
+
+.customer-print-ar-frame-pill {
+  min-height: 34px !important;
+  padding: 0 12px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.018) !important;
+  border-color: rgba(255, 255, 255, 0.11) !important;
+  color: rgba(255, 255, 255, 0.64) !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+}
+
+.customer-print-ar-frame-pill--active {
+  background: rgba(255, 255, 255, 0.075) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+  color: rgba(255, 255, 255, 0.90) !important;
+}
+
+.customer-print-ar-summary-list {
+  margin-top: 0 !important;
+}
+
+.customer-print-ar-summary-row {
+  align-items: flex-start !important;
+  gap: 14px !important;
+  min-height: 43px !important;
+  padding: 10px 0 !important;
+  border-color: rgba(255, 255, 255, 0.065) !important;
+}
+
+.customer-print-ar-summary-row span {
+  padding-top: 1px !important;
+  color: rgba(255, 255, 255, 0.52) !important;
+  font-size: 13px !important;
+  line-height: 1.18 !important;
+}
+
+.customer-print-ar-summary-row strong {
+  max-width: 58% !important;
+  color: rgba(255, 255, 255, 0.88) !important;
+  font-size: 13px !important;
+  line-height: 1.18 !important;
+  font-weight: 650 !important;
+  white-space: nowrap !important;
+  text-align: right !important;
+}
+
+.customer-print-ar-actions {
+  margin-top: 18px !important;
+}
+
+.customer-print-ar-btn,
+.customer-print-ar-action,
+.customer-print-ar-cta {
+  border-radius: 8px !important;
+  min-height: 48px !important;
+  background: rgba(255, 255, 255, 0.018) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: rgba(255, 255, 255, 0.70) !important;
+  font-weight: 650 !important;
+  letter-spacing: 0.16em !important;
+}
+
+.customer-print-ar-btn--primary,
+.customer-print-ar-action--primary,
+.customer-print-ar-cta--primary {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.20) !important;
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+.customer-print-ar-btn:hover,
+.customer-print-ar-action:hover,
+.customer-print-ar-cta:hover {
+  background: rgba(255, 255, 255, 0.065) !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+}
+
+@media (max-width: 980px) {
+  .customer-print-ar-panel {
+    max-height: calc(100svh - 28px) !important;
+  }
+
+  .customer-print-ar-body {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: minmax(340px, 52svh) minmax(0, 1fr) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .customer-print-ar-header {
+    min-height: auto !important;
+    padding: 18px 16px 14px !important;
+    gap: 14px !important;
+  }
+
+  .customer-print-ar-header h2,
+  .customer-print-ar-titleLine {
+    font-size: clamp(27px, 8vw, 36px) !important;
+    line-height: 1 !important;
+  }
+
+  .customer-print-ar-titleLine__code {
+    font-size: 0.78em;
+  }
+
+  .customer-print-ar-body {
+    grid-template-rows: minmax(260px, 40svh) minmax(0, 1fr) !important;
+  }
+
+  .customer-print-ar-summary-row {
+    flex-direction: row !important;
+    align-items: flex-start !important;
+  }
+
+  .customer-print-ar-summary-row strong {
+    max-width: 62% !important;
+    text-align: right !important;
+    white-space: normal !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .customer-print-ar-header h2,
+  .customer-print-ar-titleLine {
+    font-size: clamp(25px, 8.4vw, 32px) !important;
+  }
+
+  .customer-print-ar-header > .customer-print-ar-btn,
+  .customer-print-ar-header .customer-print-ar-btn--ghost {
+    min-width: 76px !important;
+    padding: 0 14px !important;
+  }
+}

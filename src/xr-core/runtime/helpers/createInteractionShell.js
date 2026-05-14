@@ -2,6 +2,7 @@ export function createInteractionShell({
   mount = document.body,
 }) {
   const rail = document.createElement("div");
+  rail.className = "xr-interaction-rail";
   rail.style.position = "absolute";
   rail.style.left = "0";
   rail.style.right = "0";
@@ -14,6 +15,7 @@ export function createInteractionShell({
   rail.style.zIndex = "20";
 
   const railInner = document.createElement("div");
+  railInner.className = "xr-interaction-rail-inner";
   railInner.style.minWidth = "min(92vw, 820px)";
   railInner.style.border = "1px solid rgba(255,255,255,0.12)";
   railInner.style.background = "rgba(4,6,10,0.34)";
@@ -28,6 +30,7 @@ export function createInteractionShell({
   railInner.style.boxShadow = "0 10px 30px rgba(0,0,0,0.18)";
 
   const railTitle = document.createElement("div");
+  railTitle.className = "xr-interaction-rail-title";
   railTitle.style.fontSize = "10px";
   railTitle.style.letterSpacing = "0.24em";
   railTitle.style.textTransform = "uppercase";
@@ -36,6 +39,7 @@ export function createInteractionShell({
   railTitle.style.flexShrink = "0";
 
   const railCaption = document.createElement("div");
+  railCaption.className = "xr-interaction-rail-caption";
   railCaption.style.fontSize = "12px";
   railCaption.style.lineHeight = "1.35";
   railCaption.style.color = "rgba(255,255,255,0.68)";
@@ -45,6 +49,7 @@ export function createInteractionShell({
   railCaption.style.textOverflow = "ellipsis";
 
   const railHint = document.createElement("div");
+  railHint.className = "xr-interaction-rail-hint";
   railHint.style.fontSize = "10px";
   railHint.style.letterSpacing = "0.18em";
   railHint.style.textTransform = "uppercase";
@@ -54,6 +59,7 @@ export function createInteractionShell({
   railHint.textContent = "C copy • O open";
 
   const railMeter = document.createElement("div");
+  railMeter.className = "xr-interaction-rail-meter";
   railMeter.style.width = "132px";
   railMeter.style.height = "3px";
   railMeter.style.background = "rgba(255,255,255,0.12)";
@@ -78,6 +84,7 @@ export function createInteractionShell({
   rail.appendChild(railInner);
 
   const desktopHint = document.createElement("div");
+  desktopHint.className = "xr-interaction-desktop-hint";
   desktopHint.style.position = "absolute";
   desktopHint.style.left = "16px";
   desktopHint.style.bottom = "16px";
@@ -96,6 +103,7 @@ export function createInteractionShell({
   desktopHint.textContent = "Desktop Preview";
 
   const vrHint = document.createElement("div");
+  vrHint.className = "xr-interaction-vr-hint";
   vrHint.style.position = "absolute";
   vrHint.style.left = "50%";
   vrHint.style.top = "18px";

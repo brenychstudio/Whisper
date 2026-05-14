@@ -31,26 +31,38 @@ function getScreenAngleDeg() {
   return Number(window.screen?.orientation?.angle ?? window.orientation ?? 0) || 0;
 }
 
-function applyStableGyroLook(camera, alphaDeg, betaDeg, gammaDeg, alphaOffsetDeg = 0) {
-  const screenAngle = getScreenAngleDeg();
+const DEVICE_Z_AXIS = new THREE.Vector3(0, 0, 1);
+const DEVICE_EULER = new THREE.Euler();
+const DEVICE_SCREEN_QUAT = new THREE.Quaternion();
+const DEVICE_CAMERA_FIX_QUAT = new THREE.Quaternion(
+  -Math.sqrt(0.5),
+  0,
+  0,
+  Math.sqrt(0.5)
+);
 
-  const yawDeg = -(alphaDeg - alphaOffsetDeg);
+function setDeviceOrientationQuaternion(target, alphaDeg, betaDeg, gammaDeg, screenAngleDeg) {
+  const alpha = THREE.MathUtils.degToRad(alphaDeg || 0);
+  const beta = THREE.MathUtils.degToRad(betaDeg || 0);
+  const gamma = THREE.MathUtils.degToRad(gammaDeg || 0);
+  const orient = THREE.MathUtils.degToRad(screenAngleDeg || 0);
 
-  let pitchDeg = 0;
+  DEVICE_EULER.set(beta, alpha, -gamma, "YXZ");
+  target.setFromEuler(DEVICE_EULER);
+  target.multiply(DEVICE_CAMERA_FIX_QUAT);
+  target.multiply(DEVICE_SCREEN_QUAT.setFromAxisAngle(DEVICE_Z_AXIS, -orient));
+  return target.normalize();
+}
 
-  if (Math.abs(screenAngle) === 90) {
-    // landscape
-    pitchDeg = screenAngle === 90 ? -gammaDeg : gammaDeg;
-  } else {
-    // portrait fallback
-    pitchDeg = betaDeg - 90;
-  }
+function setComfortGyroQuaternion(target, source, maxPitchRad) {
+  DEVICE_EULER.setFromQuaternion(source, "YXZ");
+  DEVICE_EULER.x = THREE.MathUtils.clamp(DEVICE_EULER.x, -maxPitchRad, maxPitchRad);
+  DEVICE_EULER.z = 0;
+  return target.setFromEuler(DEVICE_EULER).normalize();
+}
 
-  const yaw = THREE.MathUtils.degToRad(yawDeg);
-  const pitch = THREE.MathUtils.degToRad(THREE.MathUtils.clamp(pitchDeg, -80, 80));
-
-  camera.rotation.order = "YXZ";
-  camera.rotation.set(pitch, yaw, 0);
+function dampingFactor(dtMs, halfLifeMs) {
+  return 1 - Math.pow(0.5, Math.max(0, dtMs || 0) / Math.max(1, halfLifeMs || 1));
 }
 
 export default function XRRootThree({ manifest, options, xrSupported, xrChecked }) {
@@ -133,6 +145,9 @@ let mobileCleanupFns = [];
     const mobileMoveSpeed = mobileGyroCfg?.moveSpeed ?? 1.18;
     const mobileStrafeSpeed = mobileGyroCfg?.strafeSpeed ?? 0.92;
     const mobileHudFade = mobileGyroCfg?.hudFade ?? 0.92;
+    const mobileGyroSmoothMs = mobileGyroCfg?.smoothHalfLifeMs ?? 120;
+    const mobileMoveSmoothMs = mobileGyroCfg?.moveHalfLifeMs ?? 140;
+    const mobileGyroMaxPitchRad = THREE.MathUtils.degToRad(mobileGyroCfg?.maxPitchDeg ?? 68);
 
     const isCoarsePointer = window.matchMedia?.("(pointer: coarse)")?.matches ?? false;
     const hasDeviceOrientation =
@@ -213,6 +228,7 @@ renderer.xr.addEventListener("sessionend", () => {
     // ===== Camera + Rig =====
     const camera = new THREE.PerspectiveCamera(55, host.clientWidth / host.clientHeight, 0.05, 80);
     camera.position.set(0, 1.6, 0);
+    const mobileGyroNeutralQuat = camera.quaternion.clone();
 
     const rig = new THREE.Group();
     rig.position.set(0, 0, 3.6);
@@ -260,9 +276,18 @@ renderer.xr.addEventListener("sessionend", () => {
 
     let gyroActive = false;
     let gyroPermissionGranted = !needsOrientationPermission;
-    let gyroAlphaOffset = null;
     let gyroListening = false;
+    let gyroCalibrated = false;
+    let gyroNeedsRecenter = true;
+    let gyroHasTarget = false;
+    let gyroSnapLook = false;
+    const gyroRawQuat = new THREE.Quaternion();
+    const gyroComfortQuat = new THREE.Quaternion();
+    const gyroComfortQuatInv = new THREE.Quaternion();
+    const gyroCalibrationQuat = new THREE.Quaternion();
+    const gyroTargetQuat = new THREE.Quaternion();
     const mobileMoveState = { forward: 0, strafe: 0 };
+    const mobileMoveSmoothed = { forward: 0, strafe: 0 };
 
     const onCanvasClick = () => {
       if (renderer.xr.isPresenting || isMobileGyroCandidate) return;
@@ -289,18 +314,60 @@ renderer.xr.addEventListener("sessionend", () => {
       mobileHud.style.pointerEvents = value ? "auto" : "none";
     };
 
+    const recenterMobileGyro = () => {
+      gyroNeedsRecenter = true;
+      gyroHasTarget = false;
+      gyroSnapLook = true;
+      setMobileStatusText("Hold steady to center");
+    };
+
     const onDeviceOrientation = (event) => {
       const alphaDeg = Number(event.alpha);
       const betaDeg = Number(event.beta);
       const gammaDeg = Number(event.gamma);
       if (![alphaDeg, betaDeg, gammaDeg].every(Number.isFinite)) return;
 
-      if (gyroAlphaOffset == null) {
-        gyroAlphaOffset = alphaDeg;
+      setDeviceOrientationQuaternion(
+        gyroRawQuat,
+        alphaDeg,
+        betaDeg,
+        gammaDeg,
+        getScreenAngleDeg()
+      );
+      setComfortGyroQuaternion(gyroComfortQuat, gyroRawQuat, mobileGyroMaxPitchRad);
+
+      if (!gyroCalibrated || gyroNeedsRecenter) {
+        gyroComfortQuatInv.copy(gyroComfortQuat).invert();
+        gyroCalibrationQuat.copy(mobileGyroNeutralQuat).multiply(gyroComfortQuatInv);
+        gyroCalibrated = true;
+        gyroNeedsRecenter = false;
+        gyroSnapLook = true;
+        setMobileStatusText("Gyro active");
       }
 
-      applyStableGyroLook(camera, alphaDeg, betaDeg, gammaDeg, gyroAlphaOffset);
+      gyroTargetQuat.copy(gyroCalibrationQuat).multiply(gyroComfortQuat).normalize();
+      gyroHasTarget = true;
       gyroActive = true;
+    };
+
+    const updateMobileGyroLook = (dtMs) => {
+      if (
+        !isMobileGyroCandidate ||
+        renderer.xr.isPresenting ||
+        !gyroPermissionGranted ||
+        !gyroHasTarget
+      ) {
+        return;
+      }
+
+      if (gyroSnapLook) {
+        camera.quaternion.copy(gyroTargetQuat);
+        gyroSnapLook = false;
+        return;
+      }
+
+      camera.quaternion.slerp(gyroTargetQuat, dampingFactor(dtMs, mobileGyroSmoothMs));
+      camera.rotation.order = "YXZ";
     };
 
     const enableMobileGyro = async () => {
@@ -323,9 +390,11 @@ renderer.xr.addEventListener("sessionend", () => {
 
         warmupVideos();
         ambientAudio?.start();
-        setMobileStatusText("Gyro active");
+        recenterMobileGyro();
         setMobileHudVisible(true);
-        if (mobilePermissionBtn) mobilePermissionBtn.style.display = "none";
+        if (mobilePermissionBtn) {
+          mobilePermissionBtn.textContent = "Recenter view";
+        }
         hint.style.opacity = "0";
         return true;
       } catch {
@@ -337,10 +406,11 @@ renderer.xr.addEventListener("sessionend", () => {
     const makePadButton = (label, onStart, onEnd, extra = {}) => {
       const btn = document.createElement("button");
       btn.type = "button";
+      btn.className = "xr-mobile-pad-button";
       btn.textContent = label;
       Object.assign(btn.style, {
-        width: extra.w || "58px",
-        height: extra.h || "42px",
+        width: extra.w || "100%",
+        height: extra.h || "44px",
         border: "1px solid rgba(255,255,255,0.14)",
         background: "rgba(0,0,0,0.28)",
         color: "rgba(255,255,255,0.82)",
@@ -380,6 +450,7 @@ renderer.xr.addEventListener("sessionend", () => {
 
     if (isMobileGyroCandidate) {
       mobileHud = document.createElement("div");
+      mobileHud.className = "xr-mobile-hud";
       Object.assign(mobileHud.style, {
         position: "absolute",
         inset: "0",
@@ -390,9 +461,11 @@ renderer.xr.addEventListener("sessionend", () => {
       });
 
       mobileStatus = document.createElement("div");
+      mobileStatus.className = "xr-mobile-status";
       Object.assign(mobileStatus.style, {
         position: "absolute",
         left: "14px",
+        right: "14px",
         top: "14px",
         padding: "10px 12px",
         border: "1px solid rgba(255,255,255,0.12)",
@@ -401,6 +474,8 @@ renderer.xr.addEventListener("sessionend", () => {
         letterSpacing: "0.18em",
         textTransform: "uppercase",
         fontSize: "10px",
+        lineHeight: "1.45",
+        maxWidth: "calc(100% - 28px)",
       });
       mobileStatus.textContent = needsOrientationPermission
         ? "Allow motion to enter"
@@ -409,6 +484,7 @@ renderer.xr.addEventListener("sessionend", () => {
 
       mobilePermissionBtn = document.createElement("button");
       mobilePermissionBtn.type = "button";
+      mobilePermissionBtn.className = "xr-mobile-permission-button";
       mobilePermissionBtn.textContent = needsOrientationPermission
         ? "Enable motion"
         : "Begin mobile gyro";
@@ -416,6 +492,7 @@ renderer.xr.addEventListener("sessionend", () => {
         position: "absolute",
         left: "14px",
         top: "58px",
+        maxWidth: "calc(100% - 28px)",
         padding: "12px 14px",
         border: "1px solid rgba(255,255,255,0.16)",
         background: "rgba(0,0,0,0.34)",
@@ -428,6 +505,10 @@ renderer.xr.addEventListener("sessionend", () => {
 
       const onPermissionClick = async (e) => {
         e.preventDefault();
+        if (gyroListening && gyroPermissionGranted) {
+          recenterMobileGyro();
+          return;
+        }
         await enableMobileGyro();
       };
       mobilePermissionBtn.addEventListener("click", onPermissionClick);
@@ -437,15 +518,19 @@ renderer.xr.addEventListener("sessionend", () => {
       mobileHud.appendChild(mobilePermissionBtn);
 
       mobilePad = document.createElement("div");
+      mobilePad.className = "xr-mobile-pad";
       Object.assign(mobilePad.style, {
         position: "absolute",
-        left: "14px",
-        right: "14px",
-        bottom: "14px",
+        left: "50%",
+        bottom: "16px",
+        transform: "translateX(-50%)",
+        width: "min(300px, calc(100% - 28px))",
         display: "grid",
-        gridTemplateColumns: "1fr auto auto auto 1fr",
+        gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+        gridTemplateRows: "repeat(2, 44px)",
         gap: "8px",
-        alignItems: "end",
+        alignItems: "stretch",
+        pointerEvents: "auto",
       });
 
       const leftBtn = makePadButton(
@@ -466,7 +551,7 @@ renderer.xr.addEventListener("sessionend", () => {
         () => {
           if (mobileMoveState.forward > 0) mobileMoveState.forward = 0;
         },
-        { w: "72px" }
+        {}
       );
 
       const rightBtn = makePadButton(
@@ -487,20 +572,22 @@ renderer.xr.addEventListener("sessionend", () => {
         () => {
           if (mobileMoveState.forward < 0) mobileMoveState.forward = 0;
         },
-        { w: "72px" }
+        {}
       );
 
-      const centerCol = document.createElement("div");
-      centerCol.style.display = "grid";
-      centerCol.style.gap = "8px";
-      centerCol.appendChild(fwdBtn);
-      centerCol.appendChild(backBtn);
+      fwdBtn.style.gridColumn = "2";
+      fwdBtn.style.gridRow = "1";
+      leftBtn.style.gridColumn = "1";
+      leftBtn.style.gridRow = "2";
+      backBtn.style.gridColumn = "2";
+      backBtn.style.gridRow = "2";
+      rightBtn.style.gridColumn = "3";
+      rightBtn.style.gridRow = "2";
 
-      mobilePad.appendChild(document.createElement("div"));
+      mobilePad.appendChild(fwdBtn);
       mobilePad.appendChild(leftBtn);
-      mobilePad.appendChild(centerCol);
+      mobilePad.appendChild(backBtn);
       mobilePad.appendChild(rightBtn);
-      mobilePad.appendChild(document.createElement("div"));
 
       mobileHud.appendChild(mobilePad);
       host.appendChild(mobileHud);
@@ -1398,9 +1485,10 @@ const stageGlowMatBase = new THREE.MeshBasicMaterial({
 
     // ===== Interaction UI shell =====
     const interactionShell = createInteractionShell({
-      mount: document.body,
+      mount: host,
     });
-    const { setRail, setMeterProgress } = interactionShell;
+    const { setRail, setMeterProgress, setDesktopHint } = interactionShell;
+    setDesktopHint(isMobileGyroCandidate ? "Mobile gyro preview" : "Desktop preview");
 
     let collectorPanel = null;
 
@@ -2218,7 +2306,16 @@ mood = moodTarget;
 
     const updateMobileGyroMove = (dtSec) => {
       if (!isMobileGyroCandidate || renderer.xr.isPresenting || !gyroPermissionGranted) return;
-      if (!gyroActive || (!mobileMoveState.forward && !mobileMoveState.strafe)) return;
+      if (!gyroActive) return;
+
+      const moveK = dampingFactor(dtSec * 1000, mobileMoveSmoothMs);
+      mobileMoveSmoothed.forward += (mobileMoveState.forward - mobileMoveSmoothed.forward) * moveK;
+      mobileMoveSmoothed.strafe += (mobileMoveState.strafe - mobileMoveSmoothed.strafe) * moveK;
+
+      if (Math.abs(mobileMoveSmoothed.forward) < 0.01) mobileMoveSmoothed.forward = 0;
+      if (Math.abs(mobileMoveSmoothed.strafe) < 0.01) mobileMoveSmoothed.strafe = 0;
+
+      if (!mobileMoveSmoothed.forward && !mobileMoveSmoothed.strafe) return;
 
       const forward = new THREE.Vector3();
       camera.getWorldDirection(forward);
@@ -2230,8 +2327,8 @@ mood = moodTarget;
       const right = new THREE.Vector3().crossVectors(forward, up).normalize();
 
       const move = new THREE.Vector3();
-      move.addScaledVector(forward, mobileMoveState.forward * mobileMoveSpeed);
-      move.addScaledVector(right, mobileMoveState.strafe * mobileStrafeSpeed);
+      move.addScaledVector(forward, mobileMoveSmoothed.forward * mobileMoveSpeed);
+      move.addScaledVector(right, mobileMoveSmoothed.strafe * mobileStrafeSpeed);
 
       const len = move.length();
       if (len <= 0.0001) return;
@@ -2498,6 +2595,7 @@ renderer.setAnimationLoop((t) => {
   if (!isMobileGyroCandidate) {
     locomotionShell.updateDesktopMove(dtMs / 1000);
   }
+  updateMobileGyroLook(dtMs);
   updateMobileGyroMove(dtMs / 1000);
 
   updateGaze(dtMs);
@@ -2724,5 +2822,5 @@ renderer.setAnimationLoop((t) => {
     };
   }, [manifest, options, xrSupported, xrChecked]);
 
-  return <div ref={hostRef} style={{ width: "100%", height: "100%" }} />;
+  return <div ref={hostRef} className="xr-root-three-host" style={{ width: "100%", height: "100%", position: "relative" }} />;
 }

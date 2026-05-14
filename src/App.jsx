@@ -23,7 +23,8 @@ export default function App() {
       <AnimatePresence mode="wait" initial={false}>
         <Routes location={location} key={location.pathname}>
           <Route path="/p/:id/*" element={<PageTransition><SharePage /></PageTransition>} />
-          <Route path="/experience" element={<PageTransition><ExperiencePage /></PageTransition>} />
+          <Route path="/immersive" element={<PageTransition><ExperiencePage /></PageTransition>} />
+          <Route path="/experience" element={<Navigate to="/immersive" replace />} />
           <Route path="/xr" element={<PageTransition><XRPage /></PageTransition>} />
           <Route path="/" element={<PageTransition><Home /></PageTransition>} />
           <Route path="/series" element={<PageTransition><SeriesIndex /></PageTransition>} />

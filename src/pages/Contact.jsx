@@ -1,21 +1,27 @@
+import { useState } from "react";
+
 export default function Contact() {
   const email = "artproject@concept2048.com";
+  const mailto = `mailto:${email}`;
   const instagramLabel = "@concept_2048";
   const instagramUrl = "https://www.instagram.com/concept_2048/";
   const websiteUrl = "https://www.concept2048.com";
+  const [emailCopied, setEmailCopied] = useState(false);
 
   async function copyEmail() {
+    let copied = false;
+
     try {
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(email);
-        return;
+        copied = true;
       }
     } catch {
       // fallback below
     }
 
     // Fallback (works even without clipboard permissions)
-    try {
+    if (!copied) try {
       const ta = document.createElement("textarea");
       ta.value = email;
       ta.setAttribute("readonly", "");
@@ -25,9 +31,19 @@ export default function Contact() {
       ta.select();
       document.execCommand("copy");
       document.body.removeChild(ta);
+      copied = true;
     } catch {
       // no-op
     }
+
+    if (copied) {
+      setEmailCopied(true);
+      window.setTimeout(() => setEmailCopied(false), 1400);
+    }
+  }
+
+  function openEmail() {
+    window.location.href = mailto;
   }
 
   return (
@@ -86,7 +102,7 @@ export default function Contact() {
 
             <a
               className="contactLink"
-              href={`mailto:${email}`}
+              href={mailto}
               style={{
                 display: "inline-block",
                 marginTop: 10,
@@ -106,7 +122,9 @@ export default function Contact() {
               {/* Less prominent */}
               <button
                 type="button"
+                className="contactAction contactActionSecondary"
                 onClick={copyEmail}
+                aria-live="polite"
                 style={{
                   background: "transparent",
                   border: "1px solid rgba(255,255,255,0.10)",
@@ -116,27 +134,31 @@ export default function Contact() {
                   textTransform: "uppercase",
                   fontSize: 10,
                   cursor: "pointer",
+                  transition: "transform 160ms var(--ease), border-color 160ms var(--ease), color 160ms var(--ease), background 160ms var(--ease)",
                 }}
               >
-                Copy email
+                {emailCopied ? "Copied" : "Copy email"}
               </button>
 
               {/* Primary */}
-              <a
-                href={`mailto:${email}`}
+              <button
+                type="button"
+                className="contactAction contactActionPrimary"
+                onClick={openEmail}
                 style={{
-                  display: "inline-block",
+                  background: "transparent",
                   border: "1px solid rgba(255,255,255,0.18)",
                   padding: "10px 12px",
                   color: "rgba(255,255,255,0.92)",
                   letterSpacing: "0.18em",
                   textTransform: "uppercase",
                   fontSize: 10,
-                  textDecoration: "none",
+                  cursor: "pointer",
+                  transition: "transform 160ms var(--ease), border-color 160ms var(--ease), color 160ms var(--ease), background 160ms var(--ease)",
                 }}
               >
                 Open email
-              </a>
+              </button>
             </div>
           </div>
 
@@ -263,6 +285,21 @@ export default function Contact() {
         }
         .contactLink:hover{
           border-bottom-color: rgba(255,255,255,0.28) !important;
+        }
+        .contactAction:hover{
+          transform: translateY(-1px);
+          border-color: rgba(255,255,255,0.30) !important;
+          background: rgba(255,255,255,0.045) !important;
+          color: rgba(255,255,255,0.94) !important;
+        }
+        .contactAction:active{
+          transform: translateY(1px) scale(0.985);
+          background: rgba(255,255,255,0.075) !important;
+          border-color: rgba(255,255,255,0.36) !important;
+        }
+        .contactAction:focus-visible{
+          outline: 1px solid rgba(255,255,255,0.52);
+          outline-offset: 3px;
         }
       `}</style>
     </div>

@@ -12,55 +12,55 @@ const DEFAULT_ARTIST = "Concept2048";
 const DEFAULT_MAT_BY_SIZE = {
   "30x40": {
     style: "Warm white",
-    topMm: 28,
-    rightMm: 28,
-    bottomMm: 36,
-    leftMm: 28,
+    topMm: 16,
+    rightMm: 16,
+    bottomMm: 22,
+    leftMm: 16,
   },
   "40x30": {
     style: "Warm white",
-    topMm: 28,
-    rightMm: 28,
-    bottomMm: 36,
-    leftMm: 28,
+    topMm: 16,
+    rightMm: 16,
+    bottomMm: 22,
+    leftMm: 16,
   },
   "50x70": {
     style: "Warm white",
-    topMm: 36,
-    rightMm: 34,
-    bottomMm: 46,
-    leftMm: 34,
+    topMm: 22,
+    rightMm: 20,
+    bottomMm: 30,
+    leftMm: 20,
   },
   "70x50": {
     style: "Warm white",
-    topMm: 34,
-    rightMm: 36,
-    bottomMm: 44,
-    leftMm: 36,
+    topMm: 20,
+    rightMm: 22,
+    bottomMm: 28,
+    leftMm: 22,
   },
   "70x100": {
     style: "Warm white",
-    topMm: 44,
-    rightMm: 40,
-    bottomMm: 56,
-    leftMm: 40,
+    topMm: 28,
+    rightMm: 24,
+    bottomMm: 38,
+    leftMm: 24,
   },
   "100x70": {
     style: "Warm white",
-    topMm: 40,
-    rightMm: 44,
-    bottomMm: 54,
-    leftMm: 44,
+    topMm: 24,
+    rightMm: 28,
+    bottomMm: 36,
+    leftMm: 28,
   },
 };
 
 const PAPER_BORDER_PRESETS = {
-  "30x40": { topMm: 12, rightMm: 12, bottomMm: 18, leftMm: 12 },
-  "40x30": { topMm: 12, rightMm: 12, bottomMm: 18, leftMm: 12 },
-  "50x70": { topMm: 16, rightMm: 16, bottomMm: 24, leftMm: 16 },
-  "70x50": { topMm: 16, rightMm: 16, bottomMm: 24, leftMm: 16 },
-  "70x100": { topMm: 20, rightMm: 20, bottomMm: 30, leftMm: 20 },
-  "100x70": { topMm: 20, rightMm: 20, bottomMm: 30, leftMm: 20 },
+  "30x40": { topMm: 7, rightMm: 7, bottomMm: 10, leftMm: 7 },
+  "40x30": { topMm: 7, rightMm: 7, bottomMm: 10, leftMm: 7 },
+  "50x70": { topMm: 10, rightMm: 10, bottomMm: 15, leftMm: 10 },
+  "70x50": { topMm: 10, rightMm: 10, bottomMm: 15, leftMm: 10 },
+  "70x100": { topMm: 13, rightMm: 13, bottomMm: 19, leftMm: 13 },
+  "100x70": { topMm: 13, rightMm: 13, bottomMm: 19, leftMm: 13 },
 };
 
 const IMAGE_META_CACHE = new Map();
@@ -411,10 +411,10 @@ export async function buildPrintArPayload({
   const frame = buildFrameFromPreset(framePresetId);
   const mat = DEFAULT_MAT_BY_SIZE[oriented.key] ?? {
     style: "Warm white",
-    topMm: 34,
-    rightMm: 34,
-    bottomMm: 44,
-    leftMm: 34,
+    topMm: 20,
+    rightMm: 22,
+    bottomMm: 28,
+    leftMm: 22,
   };
 
   const fitted = fitArtworkIntoPaper(

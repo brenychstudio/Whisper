@@ -14,10 +14,10 @@ function resolvePaperColor(toneId) {
   const normalized = normalizeToneId(toneId);
 
   if (normalized === "black") return "#111111";
-  if (normalized === "white") return "#f7f7f4";
-  if (normalized === "ivory") return "#efe6d3";
+  if (normalized === "white") return "#fbfaf7";
+  if (normalized === "ivory") return "#f0e8d8";
 
-  return "#f4efe6";
+  return "#f8f6f0";
 }
 
 function parseSizeMm(sizeObj) {
@@ -87,10 +87,10 @@ function resolveEffectiveMarginsMm(sizeObj) {
   }
 
   return {
-    topMm: 45,
-    rightMm: 45,
-    bottomMm: 55,
-    leftMm: 45,
+    topMm: 28,
+    rightMm: 28,
+    bottomMm: 34,
+    leftMm: 28,
   };
 }
 

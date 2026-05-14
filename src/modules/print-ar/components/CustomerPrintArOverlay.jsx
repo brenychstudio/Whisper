@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { resolveMobileARBridge } from "../../../features/print-ar-host/mobile-ar/resolveMobileARBridge.js";
 import { launchMobileARBridge } from "../../../features/print-ar-host/mobile-ar/launchMobileAR.js";
 import { validateHostedAsset } from "../../../features/print-ar-host/mobile-ar/validateHostedAsset.js";
@@ -7,9 +8,10 @@ import {
   applyFramePresetToPayload,
 } from "../buildPrintArPayload.js";
 import { FRAME_PRESETS } from "../framePresets.js";
-import InteractivePrintPreview3D from "./InteractivePrintPreview3D.jsx";
 import { getCustomerPreviewState } from "../getCustomerPreviewState.js";
 import "./CustomerPrintArOverlay.css";
+
+const InteractivePrintPreview3D = lazy(() => import("./InteractivePrintPreview3D.jsx"));
 
 function formatMmToCm(value) {
   const cm = Number(value || 0) / 10;
@@ -35,6 +37,16 @@ function buildDefaultIosState() {
     sizeTier: "unknown",
     contentType: null,
     finalUrl: null,
+  };
+}
+
+function splitArtworkTitle(title) {
+  const value = String(title || "").trim();
+  const match = value.match(/^(.*?)(?:\s*[—–-]\s*)(\d+[a-z]?)$/i);
+  if (!match) return { name: value, code: "" };
+  return {
+    name: match[1].trim(),
+    code: match[2].trim(),
   };
 }
 
@@ -84,12 +96,17 @@ export default function CustomerPrintArOverlay() {
 
     if (isOpen) {
       window.addEventListener("keydown", onKeyDown);
+      const previousOverflow = document.body.style.overflow;
       document.body.style.overflow = "hidden";
+
+      return () => {
+        window.removeEventListener("keydown", onKeyDown);
+        document.body.style.overflow = previousOverflow;
+      };
     }
 
     return () => {
       window.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = "";
     };
   }, [isOpen, close]);
 
@@ -203,6 +220,28 @@ export default function CustomerPrintArOverlay() {
     launchMobileARBridge(mobileBridge.ios, payload);
   }, [payload, mobileBridge]);
 
+  const arLaunchTarget = useMemo(() => {
+    if (!mobileBridge) return null;
+    if (mobileBridge.platform === "ios") return mobileBridge.ios || null;
+    if (mobileBridge.platform === "android") return mobileBridge.android || null;
+    return mobileBridge.ios?.canLaunchAttached
+      ? mobileBridge.ios
+      : mobileBridge.android?.canLaunchAttached
+        ? mobileBridge.android
+        : mobileBridge.ios || mobileBridge.android || null;
+  }, [mobileBridge]);
+
+  const canLaunchAr = Boolean(arLaunchTarget?.canAttemptLaunch);
+  const titleParts = splitArtworkTitle(payload?.title);
+
+  const launchArPreview = useCallback(() => {
+    if (!payload || !arLaunchTarget || !canLaunchAr) return;
+    launchMobileARBridge(arLaunchTarget, payload, {
+      resizable: false,
+      enableVerticalPlacement: true,
+    });
+  }, [payload, arLaunchTarget, canLaunchAr]);
+
   if (!isOpen || !payload) return null;
 
   const framePresetOptions = payload.framePresetOptions || FRAME_PRESETS.map((preset) => ({
@@ -211,7 +250,7 @@ export default function CustomerPrintArOverlay() {
     uiLabel: preset.uiLabel,
   }));
 
-  return (
+  return createPortal(
     <div
       className="customer-print-ar-backdrop"
       onClick={close}
@@ -227,7 +266,12 @@ export default function CustomerPrintArOverlay() {
         <div className="customer-print-ar-header">
           <div>
             <div className="customer-print-ar-eyebrow">Print Preview</div>
-            <h2>{payload.title}</h2>
+            <h2 className="customer-print-ar-titleLine">
+              <span className="customer-print-ar-titleLine__name">{titleParts.name || payload.title}</span>
+              {titleParts.code ? (
+                <span className="customer-print-ar-titleLine__code">— {titleParts.code}</span>
+              ) : null}
+            </h2>
           </div>
 
           <button
@@ -241,10 +285,12 @@ export default function CustomerPrintArOverlay() {
 
         <div className="customer-print-ar-body">
           <div className="customer-print-ar-canvas">
-            <InteractivePrintPreview3D
-              payload={payload}
-              onRuntimeStatusChange={setRuntimeStatus}
-            />
+            <Suspense fallback={<div className="customer-print-ar-loading">Loading preview</div>}>
+              <InteractivePrintPreview3D
+                payload={payload}
+                onRuntimeStatusChange={setRuntimeStatus}
+              />
+            </Suspense>
           </div>
 
           <aside className="customer-print-ar-summary">
@@ -346,16 +392,27 @@ export default function CustomerPrintArOverlay() {
                 Back
               </button>
 
+              <button
+                type="button"
+                className="customer-print-ar-btn customer-print-ar-btn--secondary customer-print-ar-btn--ar"
+                onClick={launchArPreview}
+                disabled={!canLaunchAr}
+                aria-disabled={!canLaunchAr}
+              >
+                Open AR
+              </button>
+
               <a
                 className="customer-print-ar-btn customer-print-ar-btn--primary"
                 href={payload.cta?.url || "#"}
               >
-                {payload.cta?.label || "Purchase"}
+                Request
               </a>
             </div>
           </aside>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -13,6 +13,9 @@ export default function XRExperienceHost({
   options,
   autoStart = false,
   builderLoader,
+  launchLabel,
+  launchClassName,
+  launchStyle,
 }) {
   const [supported, setSupported] = useState(false);
   const [checked, setChecked] = useState(false);
@@ -29,6 +32,7 @@ export default function XRExperienceHost({
 
   const height = useMemo(() => (mode === "kiosk" ? "100dvh" : "56vh"), [mode]);
   const minHeight = useMemo(() => (mode === "kiosk" ? "100dvh" : "420px"), [mode]);
+  const hostClassName = `xr-experience-host xr-experience-host--${mode}`;
 
   useEffect(() => {
     let alive = true;
@@ -108,8 +112,18 @@ setXRRoot(() => XRRootMod.default);
   }, [started, builderLoader]);
 
   if (!started) {
+    const resolvedLaunchLabel = launchLabel ||
+      (checked
+        ? (mobileViewport && gyroCapable && !headsetXRBrowser
+            ? "Launch mobile gyro"
+            : supported
+              ? "Launch (VR ready)"
+              : "Launch preview")
+        : "Launch");
+
     return (
       <button
+        className={launchClassName}
         type="button"
         onClick={() => setStarted(true)}
         style={{
@@ -121,15 +135,10 @@ setXRRoot(() => XRRootMod.default);
           textTransform: "uppercase",
           fontSize: 11,
           cursor: "pointer",
+          ...launchStyle,
         }}
       >
-        {checked
-          ? (mobileViewport && gyroCapable && !headsetXRBrowser
-              ? "Launch mobile gyro"
-              : supported
-                ? "Launch (VR ready)"
-                : "Launch preview")
-          : "Launch"}
+        {resolvedLaunchLabel}
       </button>
     );
   }
@@ -147,7 +156,9 @@ setXRRoot(() => XRRootMod.default);
 
     try {
       if (canCopy) await navigator.clipboard.writeText(txt);
-    } catch {}
+    } catch {
+      // Diagnostics copy is optional; the visible error remains on screen.
+    }
   };
 
   return (
@@ -194,7 +205,7 @@ setXRRoot(() => XRRootMod.default);
             ) : null}
 
             <div style={{ opacity: 0.55, fontSize: 11 }}>
-              Fix manifest → refresh (/experience or /xr)
+              Fix manifest → refresh (/immersive or /xr)
             </div>
           </div>
 
@@ -235,6 +246,7 @@ setXRRoot(() => XRRootMod.default);
 
   return (
     <div
+      className={hostClassName}
       style={{
         position: "relative",
         width: "100%",
@@ -249,6 +261,7 @@ setXRRoot(() => XRRootMod.default);
 
       {checked && !supported ? (
         <div
+          className="xr-host-preview-badge"
           style={{
             position: "absolute",
             left: 14,
@@ -282,6 +295,110 @@ setXRRoot(() => XRRootMod.default);
           text-transform:uppercase;
           font-size:11px;
           border-radius:0;
+        }
+
+        .xr-host-preview-badge{
+          display:none !important;
+        }
+
+        @media (max-width: 760px){
+          .xr-experience-host--exhibition{
+            height: clamp(560px, 78svh, 680px) !important;
+            min-height: 560px !important;
+          }
+
+          .xr-experience-host--kiosk{
+            height: 100svh !important;
+            min-height: 100svh !important;
+          }
+
+          .xr-host-preview-badge{
+            display:none !important;
+          }
+
+          .xr-interaction-rail{
+            bottom:calc(126px + env(safe-area-inset-bottom, 0px)) !important;
+            padding:0 12px !important;
+            z-index:8 !important;
+          }
+
+          .xr-interaction-rail-inner{
+            min-width:0 !important;
+            width:100% !important;
+            max-width:420px !important;
+            padding:10px 12px !important;
+            display:grid !important;
+            grid-template-columns:1fr auto !important;
+            align-items:center !important;
+            gap:6px 10px !important;
+          }
+
+          .xr-interaction-rail-title{
+            min-width:0 !important;
+            grid-column:1 / -1 !important;
+            font-size:9px !important;
+            letter-spacing:0.18em !important;
+            white-space:normal !important;
+            overflow:hidden !important;
+            text-overflow:ellipsis !important;
+          }
+
+          .xr-interaction-rail-caption{
+            min-width:0 !important;
+            white-space:normal !important;
+            overflow:hidden !important;
+            display:-webkit-box !important;
+            -webkit-line-clamp:2 !important;
+            -webkit-box-orient:vertical !important;
+            font-size:11px !important;
+          }
+
+          .xr-interaction-rail-hint{
+            font-size:9px !important;
+            letter-spacing:0.14em !important;
+          }
+
+          .xr-interaction-rail-meter{
+            display:none !important;
+          }
+
+          .xr-interaction-desktop-hint,
+          .xr-interaction-vr-hint{
+            display:none !important;
+          }
+
+          .xr-mobile-status{
+            font-size:9px !important;
+            letter-spacing:0.14em !important;
+            white-space:normal !important;
+            overflow-wrap:anywhere !important;
+          }
+
+          .xr-mobile-permission-button{
+            font-size:10px !important;
+            letter-spacing:0.18em !important;
+            white-space:normal !important;
+          }
+
+          .xr-mobile-pad{
+            bottom:calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+          }
+
+          .xr-mobile-pad-button{
+            min-width:0 !important;
+            padding:0 8px !important;
+            font-size:10px !important;
+            letter-spacing:0.12em !important;
+            white-space:nowrap !important;
+          }
+
+          #VRButton{
+            right:12px;
+            bottom:calc(12px + env(safe-area-inset-bottom, 0px));
+            max-width:calc(100% - 24px);
+            white-space:normal;
+            letter-spacing:0.18em;
+          }
         }
       `}</style>
     </div>
