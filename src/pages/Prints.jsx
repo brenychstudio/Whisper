@@ -285,6 +285,18 @@ export default function Prints() {
     return Math.min(max, Math.max(min, value));
   }
 
+  function getPhotoPanVisual(pan, dragging = photoDragging) {
+    const scale = dragging ? 1.085 : 1.06;
+    const x = Number.isFinite(pan?.x) ? pan.x : 0;
+    const y = Number.isFinite(pan?.y) ? pan.y : 0;
+
+    return {
+      objectPosition: `${50 + x}% ${50 + y}%`,
+      transform: `translate3d(${-x * 0.1}%, ${-y * 0.1}%, 0) scale(${scale})`,
+      transformOrigin: `${50 + x}% ${50 + y}%`,
+    };
+  }
+
   function pulsePrintRow(id) {
     if (!id) return;
     setFlashId(id);
@@ -355,9 +367,11 @@ export default function Prints() {
   function writePhotoPan(pan, dragging = photoDragging) {
     const img = photoPanImageRef.current;
     if (!img) return;
+    const visual = getPhotoPanVisual(pan, dragging);
 
-    img.style.objectPosition = `${50 + pan.x}% ${50 + pan.y}%`;
-    img.style.transform = dragging ? "scale(1.085)" : "scale(1.06)";
+    img.style.objectPosition = visual.objectPosition;
+    img.style.transform = visual.transform;
+    img.style.transformOrigin = visual.transformOrigin;
   }
 
   function queuePhotoPan(pan, dragging = photoDragging) {
@@ -499,6 +513,7 @@ export default function Prints() {
     setSelectedSize(first || null);
     setShipOpen(false);
     photoPanRef.current = { x: 0, y: 0 };
+    setPhotoPan({ x: 0, y: 0 });
     photoDragRef.current.pointerId = null;
 
     // start cinematic inspect reveal
@@ -784,6 +799,7 @@ requestAnimationFrame(() => {
     "Printed with archival pigment inks for excellent tonal depth, sharp detail, and long-term color stability.",
     "White border for framing. Hand-signed, numbered, and includes a Certificate of Authenticity.",
   ];
+  const photoPanVisual = getPhotoPanVisual(photoPan, photoDragging);
 
   return (
     <div
@@ -1306,14 +1322,14 @@ requestAnimationFrame(() => {
         width: "100%",
         height: "100%",
         objectFit: "cover",
-        objectPosition: `${50 + photoPan.x}% ${50 + photoPan.y}%`,
+        objectPosition: photoPanVisual.objectPosition,
         display: "block",
-        transform: photoDragging ? "scale(1.085)" : "scale(1.06)",
-        transformOrigin: "center center",
+        transform: photoPanVisual.transform,
+        transformOrigin: photoPanVisual.transformOrigin,
         transition: photoDragging
           ? "none"
-          : `object-position 620ms cubic-bezier(0.16, 1, 0.3, 1), transform ${PHOTO_MS}ms cubic-bezier(0.16, 1, 0.3, 1)`,
-        willChange: "object-position, transform",
+          : `object-position 620ms cubic-bezier(0.16, 1, 0.3, 1), transform ${PHOTO_MS}ms cubic-bezier(0.16, 1, 0.3, 1), transform-origin ${PHOTO_MS}ms cubic-bezier(0.16, 1, 0.3, 1)`,
+        willChange: "object-position, transform, transform-origin",
       }}
     />
   </div>

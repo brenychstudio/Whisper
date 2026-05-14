@@ -150,6 +150,8 @@ let mobileCleanupFns = [];
     const mobileGyroMaxPitchRad = THREE.MathUtils.degToRad(mobileGyroCfg?.maxPitchDeg ?? 68);
 
     const isCoarsePointer = window.matchMedia?.("(pointer: coarse)")?.matches ?? false;
+    const isMobileOrTabletViewport =
+      window.matchMedia?.("(max-width: 1180px)")?.matches ?? false;
     const hasDeviceOrientation =
       typeof window !== "undefined" && "DeviceOrientationEvent" in window;
     const needsOrientationPermission =
@@ -164,6 +166,8 @@ let mobileCleanupFns = [];
       isCoarsePointer &&
       hasDeviceOrientation &&
       !isHeadsetXRBrowser;
+    const shouldShowVrButton =
+      xrSupported && (isHeadsetXRBrowser || (!isCoarsePointer && !isMobileOrTabletViewport));
 
     const snapTurnDeg = options?.locomotion?.snapTurnDeg ?? 30;
     const snapCooldownMs = options?.locomotion?.snapCooldownMs ?? 320;
@@ -184,7 +188,7 @@ let mobileCleanupFns = [];
 
     // VR Button (Quest only)
     let vrBtn = null;
-    if (xrSupported) {
+    if (shouldShowVrButton) {
       const xrSessionInit = {
         requiredFeatures: ["local-floor"],
         optionalFeatures: ["hand-tracking"],

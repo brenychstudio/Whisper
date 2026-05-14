@@ -518,30 +518,6 @@ export async function buildExportSceneGroup(payload, options = {}) {
   artMesh.userData.part = "artwork";
   group.add(artMesh);
 
-  const glassGeometry = track(disposables, new THREE.PlaneGeometry(imageWidth, imageHeight));
-  const glassMaterial = track(
-    disposables,
-    new THREE.MeshPhysicalMaterial({
-      color: "#ffffff",
-      transparent: true,
-      opacity: 0.055,
-      roughness: 0.08,
-      metalness: 0,
-      clearcoat: 1,
-      clearcoatRoughness: 0.18,
-      depthWrite: false,
-      side: THREE.DoubleSide,
-    }),
-  );
-  const glassMesh = new THREE.Mesh(glassGeometry, glassMaterial);
-  glassMesh.position.set(
-    imageOffsetX,
-    imageOffsetY,
-    artworkZ + 0.00045,
-  );
-  glassMesh.userData.part = "glass";
-  group.add(glassMesh);
-
   group.userData.printPreview = {
     productId: payload?.productId || "",
     variantId: payload?.variantId || "",

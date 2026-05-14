@@ -3,6 +3,17 @@ import styles from "./ScrollVideoStage.module.css";
 
 const clamp01 = (x) => Math.max(0, Math.min(1, x));
 const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+const getViewportHeight = () =>
+  window.visualViewport?.height || window.innerHeight || document.documentElement.clientHeight || 1;
+
+const isCompactViewport = () => {
+  const narrow = window.matchMedia?.("(max-width: 760px)")?.matches ?? false;
+  const tabletTouch =
+    (window.matchMedia?.("(max-width: 1024px)")?.matches ?? false) &&
+    (window.matchMedia?.("(pointer: coarse)")?.matches ?? false);
+
+  return narrow || tabletTouch;
+};
 
 export default function ScrollVideoStage({
   src,
@@ -35,14 +46,19 @@ export default function ScrollVideoStage({
 
     const computeTarget = () => {
       const rect = section.getBoundingClientRect();
-      const vh = window.innerHeight;
+      const vh = getViewportHeight();
 
       // прогрес 0..1 по проходженню секції
       const total = Math.max(1, rect.height - vh);
+      const compact = isCompactViewport();
 
 /* lead-in: анімація починається, коли секція ще під’їжджає (Apple-style) */
 const lead = vh * 0.35; // 35% viewport “заздалегідь”
-const raw = (lead - rect.top) / total;
+const mobileStart = vh * 0.92;
+const mobileEnd = -vh * 0.08;
+const raw = compact
+  ? (mobileStart - rect.top) / Math.max(1, mobileStart - mobileEnd)
+  : (lead - rect.top) / total;
 
 target = clamp01(raw);
 
@@ -70,7 +86,7 @@ if (video) {
     const tick = () => {
       raf = 0;
       // “signature smoothness”: не тільки на scroll — доганяємо до target
-      p = p + (target - p) * 0.12;
+      p = p + (target - p) * (isCompactViewport() ? 0.34 : 0.12);
       if (Math.abs(target - p) < 0.0008) p = target;
 
       setVars(p);
@@ -102,6 +118,8 @@ if (video) {
   style={{
     height: `${heightVh + introVh}vh`,
     ["--introVh"]: introVh,
+    ["--mobileStageHeight"]: `${Math.max(136, Math.min(160, heightVh * 0.58))}svh`,
+    ["--mobileIntro"]: `${Math.max(5, Math.min(9, introVh * 0.36))}svh`,
     ["--stickyTop"]: `calc(var(--header-h) + ${topOffset}px)`,
   }}
 >

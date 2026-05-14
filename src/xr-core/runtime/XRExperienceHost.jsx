@@ -32,7 +32,12 @@ export default function XRExperienceHost({
 
   const height = useMemo(() => (mode === "kiosk" ? "100dvh" : "56vh"), [mode]);
   const minHeight = useMemo(() => (mode === "kiosk" ? "100dvh" : "420px"), [mode]);
-  const hostClassName = `xr-experience-host xr-experience-host--${mode}`;
+  const hideVrButton = mobileViewport && !headsetXRBrowser;
+  const hostClassName = [
+    "xr-experience-host",
+    `xr-experience-host--${mode}`,
+    hideVrButton ? "xr-experience-host--hide-vr-button" : "",
+  ].filter(Boolean).join(" ");
 
   useEffect(() => {
     let alive = true;
@@ -301,6 +306,59 @@ setXRRoot(() => XRRootMod.default);
           display:none !important;
         }
 
+        .xr-experience-host--hide-vr-button #VRButton{
+          display:none !important;
+        }
+
+        .xr-experience-host--exhibition .xr-interaction-desktop-hint{
+          display:none !important;
+        }
+
+        .xr-experience-host--exhibition .xr-interaction-rail{
+          bottom:8px !important;
+          padding:0 10px !important;
+        }
+
+        .xr-experience-host--exhibition .xr-interaction-rail-inner{
+          min-width:0 !important;
+          width:min(100%, 520px) !important;
+          max-width:calc(100% - 20px) !important;
+          padding:7px 9px !important;
+          display:grid !important;
+          grid-template-columns:minmax(58px, auto) minmax(0, 1fr) auto !important;
+          align-items:center !important;
+          gap:7px !important;
+          border-color:rgba(255,255,255,0.08) !important;
+          background:rgba(4,6,10,0.26) !important;
+          box-shadow:none !important;
+        }
+
+        .xr-experience-host--exhibition .xr-interaction-rail-title{
+          min-width:0 !important;
+          font-size:8px !important;
+          letter-spacing:0.14em !important;
+          overflow:hidden !important;
+          text-overflow:ellipsis !important;
+          white-space:nowrap !important;
+        }
+
+        .xr-experience-host--exhibition .xr-interaction-rail-caption{
+          min-width:0 !important;
+          font-size:9px !important;
+          line-height:1.25 !important;
+          color:rgba(255,255,255,0.52) !important;
+        }
+
+        .xr-experience-host--exhibition .xr-interaction-rail-hint{
+          font-size:8px !important;
+          letter-spacing:0.12em !important;
+          color:rgba(255,255,255,0.42) !important;
+        }
+
+        .xr-experience-host--exhibition .xr-interaction-rail-meter{
+          display:none !important;
+        }
+
         @media (max-width: 760px){
           .xr-experience-host--exhibition{
             height: clamp(560px, 78svh, 680px) !important;
@@ -390,14 +448,6 @@ setXRRoot(() => XRRootMod.default);
             font-size:10px !important;
             letter-spacing:0.12em !important;
             white-space:nowrap !important;
-          }
-
-          #VRButton{
-            right:12px;
-            bottom:calc(12px + env(safe-area-inset-bottom, 0px));
-            max-width:calc(100% - 24px);
-            white-space:normal;
-            letter-spacing:0.18em;
           }
         }
       `}</style>
